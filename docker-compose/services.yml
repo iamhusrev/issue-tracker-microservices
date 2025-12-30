@@ -1,61 +1,72 @@
-version: '2.1'
 services:
   database:
-    restart: "no"
-    image: postgres:latest
+    image: postgres:16
     ports:
       - "5435:5432"
     environment:
-      POSTGRES_USER: "postgres"
-      POSTGRES_PASSWORD: "admin"
-      POSTGRES_DB: "ticketing-app"
-    volumes:
-      - ./init:/docker-entrypoint-initdb.d
-    networks:
-      backend:
-        aliases:
-          - "database"
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: ticketing-app
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
       interval: 10s
       timeout: 5s
       retries: 5
+    networks: [ backend ]
+
+  discovery-service:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+      args:
+        MODULE: discovery-service
+    image: discovery-service:dev
+    ports:
+      - "8761:8761"
+    networks: [ backend ]
+
   userservice:
-    image: ${GROUP_ID}/user-service:${SERVICE_VERSION:-latest}
-    environment:
-      - "PROFILE=dev"
-      - "JAVA_OPTS:-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5007 -Xms128m -Xmx256m"
-    depends_on:
-      database:
-        condition: service_healthy
+    build:
+      context: ..
+      dockerfile: Dockerfile
+      args:
+        MODULE: user-service
+    image: user-service:dev
     ports:
       - "9090:9090"
-    networks:
-      - backend
-  projectservice:
-    image: ${GROUP_ID}/project-service:${SERVICE_VERSION:-latest}
-    environment:
-      - "PROFILE=dev"
-      - "JAVA_OPTS:-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5007 -Xms128m -Xmx256m"
     depends_on:
       database:
         condition: service_healthy
+    networks: [ backend ]
+
+  projectservice:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+      args:
+        MODULE: project-service
+    image: project-service:dev
     ports:
       - "9091:9091"
-    networks:
-      - backend
-  taskservice:
-    image: ${GROUP_ID}/task-service:${SERVICE_VERSION:-latest}
-    environment:
-      - "PROFILE=dev"
-      - "JAVA_OPTS:-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5007 -Xms128m -Xmx256m"
     depends_on:
       database:
         condition: service_healthy
+    networks: [ backend ]
+
+  taskservice:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+      args:
+        MODULE: task-service
+    image: task-service:dev
     ports:
       - "9092:9092"
-    networks:
-      - backend
+    depends_on:
+      database:
+        condition: service_healthy
+    networks: [ backend ]
+
 networks:
   backend:
     driver: bridge
