@@ -14,8 +14,10 @@ spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/ticketing-app
     username: postgres
-    password: admin
+    password: postgres
     driver-class-name: org.postgresql.Driver
-    initialization-mode: always
+  sql:
+    init:
+      mode:
 server:
   port: 9090
