@@ -12,6 +12,7 @@
         <module name="task-service" />
         <module name="user-service" />
         <module name="project-service" />
+        <module name="discovery-service" />
       </profile>
     </annotationProcessing>
   </component>
@@ -19,6 +20,7 @@
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="app-client-management" options="-parameters" />
       <module name="app-domain-model" options="-parameters" />
+      <module name="discovery-service" options="-parameters" />
       <module name="project-service" options="-parameters" />
       <module name="task-service" options="-parameters" />
       <module name="ticketing-microservices" options="" />

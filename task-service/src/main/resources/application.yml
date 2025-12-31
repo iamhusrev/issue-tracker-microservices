@@ -1,20 +1,31 @@
 spring:
   application:
-    name: ticketing-project-rest
-  profiles:
-    active: default
+    name: task-service
 
-  jpa:
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
-    hibernate:
-      ddl-auto: update
-    show-sql: true
   datasource:
-    url: jdbc:postgresql://localhost:5432/ticketing-app
+    url: jdbc:postgresql://database:5432/ticketing-app
     username: postgres
     password: postgres
     driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
 server:
   port: 9092
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://discovery-service:8761/eureka
+    register-with-eureka: true
+    fetch-registry: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+

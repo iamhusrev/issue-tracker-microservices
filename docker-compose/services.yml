@@ -1,0 +1,72 @@
+services:
+  database:
+    image: postgres:16
+    ports:
+      - "5435:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: ticketing-app
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks: [ backend ]
+
+  discovery-service:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+      args:
+        MODULE: discovery-service
+    image: discovery-service:dev
+    ports:
+      - "8761:8761"
+    networks: [ backend ]
+
+  userservice:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+      args:
+        MODULE: user-service
+    image: user-service:dev
+    ports:
+      - "9090:9090"
+    depends_on:
+      database:
+        condition: service_healthy
+    networks: [ backend ]
+
+  projectservice:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+      args:
+        MODULE: project-service
+    image: project-service:dev
+    ports:
+      - "9091:9091"
+    depends_on:
+      database:
+        condition: service_healthy
+    networks: [ backend ]
+
+  taskservice:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+      args:
+        MODULE: task-service
+    image: task-service:dev
+    ports:
+      - "9092:9092"
+    depends_on:
+      database:
+        condition: service_healthy
+    networks: [ backend ]
+
+networks:
+  backend:
+    driver: bridge
