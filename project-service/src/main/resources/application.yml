@@ -20,46 +20,30 @@ server:
   port: 9091
 
 eureka:
+  instance:
+    status-page-url-path: ${management.context-path}/info
+    health-check-url-path: ${management.context-path}/health
   client:
-    service-url:
-      defaultZone: http://discovery-service:8761/eureka
-    register-with-eureka: true
-    fetch-registry: true
+    serviceUrl:
+      defaultZone: http://discovery-service:8761/eureka/
+
 
 management:
+  endpoint:
+    health:
+      show-details: "ALWAYS"
   endpoints:
     web:
       exposure:
-        include: health,info,metrics,env,beans,loggers
-        # Açık olan actuator endpoint'leri
+        include: "*"
+  context-path: http://localhost:${server.port}/actuator
 
-  endpoint:
-    health:
-      show-details: always
-      probes:
-        enabled: true
-        # Kubernetes readiness/liveness için
 
-    info:
-      enabled: true
-
-    metrics:
-      enabled: true
-
-    env:
-      enabled: true
-      show-values: when-authorized
-      # Env değerlerini sadece auth varsa göster
-
-    loggers:
-      enabled: true
-      # Runtime log level değiştirme
-
-  health:
-    db:
-      enabled: true
-    diskspace:
-      enabled: true
-    ping:
-      enabled: true
+info:
+  application:
+    name: ${spring.application.name}
+    description: Ticketing Application
+    version: '@project.version@'
+    spring-cloud-version: '@spring-cloud.version@'
+    spring-boot-version: '@project.parent.version@'
 
