@@ -1,5 +1,6 @@
 services:
   database:
+    restart: "no"
     image: postgres:16
     ports:
       - "5435:5432"
@@ -13,6 +14,8 @@ services:
       timeout: 5s
       retries: 5
     networks: [ backend ]
+
+
 
   discovery-service:
     build:
@@ -31,7 +34,7 @@ services:
       start_period: 30s
     networks: [ backend ]
 
-  userservice:
+  user-service:
     build:
       context: ..
       dockerfile: Dockerfile
@@ -53,7 +56,7 @@ services:
       start_period: 40s
     networks: [ backend ]
 
-  projectservice:
+  project-service:
     build:
       context: ..
       dockerfile: Dockerfile
@@ -75,7 +78,7 @@ services:
       start_period: 40s
     networks: [ backend ]
 
-  taskservice:
+  task-service:
     build:
       context: ..
       dockerfile: Dockerfile
@@ -96,6 +99,23 @@ services:
       retries: 5
       start_period: 40s
     networks: [ backend ]
+
+  gateway-service:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+      args:
+        MODULE: gateway-service
+    image: gateway-service:dev
+    ports:
+      - "8762:8762"
+    depends_on:
+      - discovery-service
+      - user-service
+      - project-service
+      - task-service
+    networks:
+      - backend
 
 networks:
   backend:

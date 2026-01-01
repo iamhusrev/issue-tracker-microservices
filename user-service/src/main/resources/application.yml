@@ -3,7 +3,6 @@ spring:
     name: user-service
   profiles:
     active: default
-
   jpa:
     properties:
       hibernate:
@@ -12,36 +11,36 @@ spring:
       ddl-auto: update
     show-sql: true
   datasource:
-    url: jdbc:postgresql://database:5432/ticketing-app
+    url: jdbc:postgresql://host.docker.internal:5435/ticketing-app
     username: postgres
     password: postgres
     driver-class-name: org.postgresql.Driver
-  sql:
-    init:
-      mode:
 server:
   port: 9090
 
 eureka:
   instance:
-    status-page-url-path: ${management.context-path}/info
-    health-check-url-path: ${management.context-path}/health
+    status-page-url-path: http://localhost:${server.port}/actuator/info
+    health-check-url-path: http://localhost:${server.port}/actuator/health
+    instance-id: ${spring.application.name}:${server.port}
   client:
     serviceUrl:
       defaultZone: http://discovery-service:8761/eureka/
 
 
 management:
-  endpoint:
-    health:
-      show-details: "ALWAYS"
   endpoints:
     web:
       exposure:
         include: "*"
-  context-path: http://localhost:${server.port}/actuator
-
-
+  endpoint:
+    health:
+      show-details: "ALWAYS"
+  info:
+    env:
+      enabled: true
+    build:
+      enabled: true
 
 info:
   application:
@@ -50,4 +49,7 @@ info:
     version: '@project.version@'
     spring-cloud-version: '@spring-cloud.version@'
     spring-boot-version: '@project.parent.version@'
+
+
+
 

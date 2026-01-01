@@ -10,6 +10,7 @@ COPY user-service/pom.xml user-service/pom.xml
 COPY project-service/pom.xml project-service/pom.xml
 COPY task-service/pom.xml task-service/pom.xml
 COPY discovery-service/pom.xml discovery-service/pom.xml
+COPY gateway-service/pom.xml gateway-service/pom.xml
 
 RUN mvn -B -q dependency:go-offline
 

@@ -1,0 +1,66 @@
+
+spring:
+  application:
+    name: gateway-service
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
+      routes:
+        - id: user-service
+          uri: lb://user-service
+          predicates:
+            - Path=/iamhusrev/dev/user/**
+          filters:
+            - RewritePath=/iamhusrev/dev/user/(?<segment>.*),/$\{segment}
+        - id: project-service
+          uri: lb://project-service
+          predicates:
+            - Path=/iamhusrev/dev/project/**
+          filters:
+            - RewritePath=/iamhusrev/dev/project/(?<segment>.*),/$\{segment}
+        - id: task-service
+          uri: lb://task-service
+          predicates:
+            - Path=/iamhusrev/dev/task/**
+          filters:
+            - RewritePath=/iamhusrev/dev/task/(?<segment>.*),/$\{segment}
+
+server:
+  port: 8762
+
+eureka:
+  instance:
+    status-page-url-path: http://localhost:${server.port}/actuator/info
+    health-check-url-path: http://localhost:${server.port}/actuator/health
+    instance-id: ${spring.application.name}:${server.port}
+  client:
+    serviceUrl:
+      defaultZone: http://discovery-service:8761/eureka/
+
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: "ALWAYS"
+    gateway:
+      enabled: true
+  info:
+    env:
+      enabled: true
+    build:
+      enabled: true
+
+info:
+  application:
+    name: ${spring.application.name}
+    description: Ticketing Application
+    version: '@project.version@'
+    spring-cloud-version: '@spring-cloud.version@'
+    spring-boot-version: '@project.parent.version@'
