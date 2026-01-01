@@ -18,13 +18,11 @@ spring:
     driver-class-name: org.postgresql.Driver
 server:
   port: 9091
-context-path: http://localhost:${server.port}/actuator
-
 
 eureka:
   instance:
-    status-page-url-path: ${context-path}/info
-    health-check-url-path: ${context-path}/health
+    status-page-url-path: /actuator/info
+    health-check-url-path: /actuator/health
   client:
     serviceUrl:
       defaultZone: http://discovery-service:8761/eureka/
@@ -33,10 +31,9 @@ eureka:
 info:
   application:
     name: ${spring.application.name}
-    description: Ticketing Application
-    version: '@project.version@'
-    spring-cloud-version: '@spring-cloud.version@'
-    spring-boot-version: '@project.parent.version@'
+    version: ${spring.application.version}
+    description: Ticketing Microservice
+
 
 
 management:
@@ -50,10 +47,3 @@ management:
     health:
       show-details: ALWAYS
 
-  health:
-    db:
-      enabled: true
-    diskspace:
-      enabled: true
-    ping:
-      enabled: true
