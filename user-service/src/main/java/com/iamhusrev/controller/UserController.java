@@ -1,10 +1,10 @@
 package com.iamhusrev.controller;
 
-
 import com.iamhusrev.dto.UserDTO;
 import com.iamhusrev.entity.ResponseWrapper;
 import com.iamhusrev.exception.UserServiceException;
 import com.iamhusrev.service.UserService;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,42 +17,65 @@ import java.util.List;
 public class UserController {
 
     private final UserService userService;
+    private final UserFallbackHandler fallbackHandler;
 
-    public UserController(UserService userService) {
+    public UserController(UserService userService, UserFallbackHandler fallbackHandler) {
         this.userService = userService;
+        this.fallbackHandler = fallbackHandler;
     }
 
     @GetMapping
+    @CircuitBreaker(name = "user-service", fallbackMethod = "getUsersFallback")
     public ResponseEntity<ResponseWrapper> getUsers() {
         List<UserDTO> userDTOList = userService.listAllUsers();
         return ResponseEntity.ok(new ResponseWrapper("Users are successfully retrieved", userDTOList, HttpStatus.OK));
     }
 
     @GetMapping("/{userName}")
-    public ResponseEntity<ResponseWrapper> getUserByUserName(@PathVariable("userName") String userName) throws AccessDeniedException {
+    @CircuitBreaker(name = "user-service", fallbackMethod = "getUserByUserNameFallback")
+    public ResponseEntity<ResponseWrapper> getUserByUserName(@PathVariable String userName) throws AccessDeniedException {
         UserDTO user = userService.findByUserName(userName);
         return ResponseEntity.ok(new ResponseWrapper("User is successfully retrieved", user, HttpStatus.OK));
     }
 
     @PostMapping
+    @CircuitBreaker(name = "user-service", fallbackMethod = "createUpdateFallback")
     public ResponseEntity<ResponseWrapper> createUser(@RequestBody UserDTO user) throws UserServiceException {
         userService.save(user);
         return ResponseEntity.status(HttpStatus.CREATED).body(new ResponseWrapper("User is successfully created", HttpStatus.CREATED));
     }
 
     @PutMapping
+    @CircuitBreaker(name = "user-service", fallbackMethod = "createUpdateFallback")
     public ResponseEntity<ResponseWrapper> updateUser(@RequestBody UserDTO user) throws UserServiceException, AccessDeniedException {
         userService.update(user);
         return ResponseEntity.ok(new ResponseWrapper("User is successfully updated", user, HttpStatus.OK));
     }
 
     @DeleteMapping("/{userName}")
-    public ResponseEntity<ResponseWrapper> deleteUser(@PathVariable("userName") String userName) {
+    @CircuitBreaker(name = "user-service", fallbackMethod = "deleteUserFallback")
+    public ResponseEntity<ResponseWrapper> deleteUser(@PathVariable String userName) {
         userService.deleteByUserName(userName);
         return ResponseEntity.ok(new ResponseWrapper("User is successfully deleted", HttpStatus.OK));
-//        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(new ResponseWrapper("User is successfully created",HttpStatus.CREATED));
+    }
 
-        //204 - HttpStatus.NO_CONTENT
+    // -------------------------------------------------------------------------
+    // FALLBACK BRIDGE METHODS
+    // -------------------------------------------------------------------------
+
+    public ResponseEntity<ResponseWrapper> getUsersFallback(Throwable t) {
+        return fallbackHandler.handleListFallback(t);
+    }
+
+    public ResponseEntity<ResponseWrapper> getUserByUserNameFallback(String userName, Throwable t) {
+        return fallbackHandler.handleSingleUserFallback(userName, t);
+    }
+
+    public ResponseEntity<ResponseWrapper> createUpdateFallback(UserDTO user, Throwable t) {
+        return fallbackHandler.handleUserModificationFallback(user, t);
+    }
+
+    public ResponseEntity<ResponseWrapper> deleteUserFallback(String userName, Throwable t) {
+        return fallbackHandler.handleUserDeletionFallback(userName, t);
     }
 }
-
