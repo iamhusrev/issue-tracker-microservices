@@ -1,3 +1,5 @@
+server:
+  port: 8762
 
 spring:
   application:
@@ -28,18 +30,15 @@ spring:
           filters:
             - RewritePath=/iamhusrev/dev/task/(?<segment>.*),/$\{segment}
 
-server:
-  port: 8762
-
 eureka:
   instance:
     status-page-url-path: http://localhost:${server.port}/actuator
     health-check-url-path: http://localhost:${server.port}/actuator/health
     instance-id: ${spring.application.name}:${server.port}
+    prefer-ip-address: true
   client:
     serviceUrl:
-      defaultZone: http://discovery-service:8761/eureka/
-
+      defaultZone: http://${EUREKA_HOST:discovery-service}:8761/eureka/
 
 management:
   endpoints:
@@ -56,6 +55,13 @@ management:
       enabled: true
     build:
       enabled: true
+
+  tracing:
+    sampling:
+      probability: 1.0
+  zipkin:
+    tracing:
+      endpoint: http://${ZIPKIN_HOST:zipkin}:9411/api/v2/spans
 
 info:
   application:

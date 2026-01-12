@@ -33,9 +33,36 @@
         <lombok.version>1.18.32</lombok.version>
     </properties>
 
+    <dependencies>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-tracing-bridge-brave</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>io.zipkin.reporter2</groupId>
+            <artifactId>zipkin-reporter-brave</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>io.github.openfeign</groupId>
+            <artifactId>feign-micrometer</artifactId>
+        </dependency>
+    </dependencies>
+
     <dependencyManagement>
         <dependencies>
-            <!-- Spring Cloud BOM -->
             <dependency>
                 <groupId>org.springframework.cloud</groupId>
                 <artifactId>spring-cloud-dependencies</artifactId>
@@ -44,7 +71,6 @@
                 <scope>import</scope>
             </dependency>
 
-            <!-- Internal modules -->
             <dependency>
                 <groupId>com.iamhusrev</groupId>
                 <artifactId>app-domain-model</artifactId>
@@ -57,7 +83,6 @@
                 <version>${project.version}</version>
             </dependency>
 
-            <!-- ModelMapper version management -->
             <dependency>
                 <groupId>org.modelmapper</groupId>
                 <artifactId>modelmapper</artifactId>
@@ -70,11 +95,12 @@
         <resources>
             <resource>
                 <directory>src/main/resources</directory>
-                <filtering>true</filtering> <includes>
-                <include>**/application*.yml</include>
-                <include>**/application*.properties</include>
-                <include>**/logback*.xml</include>
-            </includes>
+                <filtering>true</filtering>
+                <includes>
+                    <include>**/application*.yml</include>
+                    <include>**/application*.properties</include>
+                    <include>**/logback*.xml</include>
+                </includes>
             </resource>
         </resources>
 
@@ -86,13 +112,12 @@
                     <executions>
                         <execution>
                             <goals>
-                                <goal>build-info</goal> </goals>
+                                <goal>build-info</goal>
+                            </goals>
                         </execution>
                     </executions>
                 </plugin>
             </plugins>
         </pluginManagement>
     </build>
-
-
 </project>

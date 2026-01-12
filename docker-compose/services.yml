@@ -109,11 +109,14 @@ services:
     image: gateway-service:dev
     ports:
       - "8762:8762"
-    depends_on:
-      - discovery-service
-      - user-service
-      - project-service
-      - task-service
+    networks:
+      - backend
+
+  zipkin:
+    image: openzipkin/zipkin
+    container_name: zipkin
+    ports:
+      - "9411:9411"
     networks:
       - backend
 

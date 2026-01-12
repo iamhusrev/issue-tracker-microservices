@@ -1,15 +1,35 @@
-spring:
-  cloud:
-    loadbalancer:
-      ribbon:
-        enabled: false
-
 server:
   port: 8761
 
+spring:
+  application:
+    name: discovery-service
+
 eureka:
+  instance:
+    hostname: localhost
   client:
-    serviceUrl:
-      defaultZone: http://discovery-service:8761/eureka/
     register-with-eureka: false
     fetch-registry: false
+    serviceUrl:
+      defaultZone: http://${EUREKA_HOST:localhost}:8761/eureka/
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: "ALWAYS"
+  info:
+    env:
+      enabled: true
+    build:
+      enabled: true
+
+info:
+  application:
+    name: ${spring.application.name}
+    description: Ticketing Application (Discovery Server)
+    version: '@project.version@'
