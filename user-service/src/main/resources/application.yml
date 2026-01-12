@@ -15,12 +15,32 @@ spring:
     username: postgres
     password: postgres
     driver-class-name: org.postgresql.Driver
+  cloud:
+    openfeign:
+      circuitbreaker:
+        enabled: true
+
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        registerHealthIndicator: true
+        slidingWindowType: COUNT_BASED
+        slidingWindowSize: 10
+        minimumNumberOfCalls: 5
+        failureRateThreshold: 50
+        waitDurationInOpenState: 5s
+        permittedNumberOfCallsInHalfOpenState: 3
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+
+
+
 server:
   port: 9090
 
 eureka:
   instance:
-    status-page-url-path: http://localhost:${server.port}/actuator/info
+    status-page-url-path: http://localhost:${server.port}/actuator
     health-check-url-path: http://localhost:${server.port}/actuator/health
     instance-id: ${spring.application.name}:${server.port}
   client:
@@ -49,7 +69,6 @@ info:
     version: '@project.version@'
     spring-cloud-version: '@spring-cloud.version@'
     spring-boot-version: '@project.parent.version@'
-
 
 
 

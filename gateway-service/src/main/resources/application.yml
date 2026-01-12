@@ -33,7 +33,7 @@ server:
 
 eureka:
   instance:
-    status-page-url-path: http://localhost:${server.port}/actuator/info
+    status-page-url-path: http://localhost:${server.port}/actuator
     health-check-url-path: http://localhost:${server.port}/actuator/health
     instance-id: ${spring.application.name}:${server.port}
   client:

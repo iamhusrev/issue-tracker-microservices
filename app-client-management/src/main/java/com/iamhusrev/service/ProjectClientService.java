@@ -5,7 +5,7 @@ import com.iamhusrev.entity.ResponseWrapper;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 
-@FeignClient(name = "project-service", path = "/api/v1/project")
+@FeignClient(name = "project-service", path = "/api/v1/project", fallback = UserClientFallback.class)
 public interface ProjectClientService {
 
     @GetMapping
