@@ -9,7 +9,6 @@
         <outputRelativeToContentRoot value="true" />
         <module name="app-domain-model" />
         <module name="gateway-service" />
-        <module name="app-client-management" />
         <module name="task-service" />
         <module name="user-service" />
         <module name="project-service" />
