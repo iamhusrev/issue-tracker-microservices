@@ -21,9 +21,9 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ProjectServiceImpl implements ProjectService {
 
-    private ProjectRepository projectRepository;
-    private MapperUtil mapperUtil;
-    private UserClientService userClientService;
+    private final ProjectRepository projectRepository;
+    private final MapperUtil mapperUtil;
+    private final UserClientService userClientService;
 
 
     @Override
