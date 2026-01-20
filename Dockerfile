@@ -2,7 +2,7 @@
 FROM maven:3.9.9-eclipse-temurin-17 AS build
 WORKDIR /build
 
-# pom'ları önce al (cache)
+# Pre-cache dependencies
 COPY pom.xml .
 COPY app-domain-model/pom.xml app-domain-model/pom.xml
 COPY app-client-management/pom.xml app-client-management/pom.xml
@@ -14,20 +14,21 @@ COPY gateway-service/pom.xml gateway-service/pom.xml
 
 RUN mvn -B -q dependency:go-offline
 
-# source
+# Source copy
 COPY . .
 
-# sadece istenen modülü build et
+# Build only the requested module
 ARG MODULE
 RUN mvn -pl ${MODULE} -am -DskipTests package
 
 # ---------- RUNTIME STAGE ----------
-FROM eclipse-temurin:17-jre-alpine
+# Changed from 'alpine' to standard 'jre' to support Mac M1/M2/M3 & Windows
+FROM eclipse-temurin:17-jre
 
 WORKDIR /app
 
-# Install curl for healthcheck
-RUN apk add --no-cache curl
+# Changed 'apk' to 'apt-get' because we are no longer on Alpine
+RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
 
 ARG MODULE
 COPY --from=build /build/${MODULE}/target/*.jar app.jar
@@ -37,4 +38,3 @@ ENV JAVA_OPTS="-Xms128m -Xmx512m"
 EXPOSE 8080
 
 ENTRYPOINT ["sh","-c","java $JAVA_OPTS -jar /app/app.jar"]
-
