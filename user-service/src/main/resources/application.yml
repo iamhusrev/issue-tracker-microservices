@@ -1,5 +1,5 @@
 server:
-  port: ${SERVER_PORT:9090}
+  port: ${SERVER_PORT:9093}
 
 spring:
   application:
@@ -14,16 +14,15 @@ spring:
       ddl-auto: update
     show-sql: true
   datasource:
-    url: jdbc:postgresql://${DB_HOST:database}:${DB_PORT:5432}/ticketing-app
-    username: postgres
-    password: postgres
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/ticketing-app
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:postgres}
     driver-class-name: org.postgresql.Driver
   cloud:
     openfeign:
       circuitbreaker:
         enabled: true
 
-# Resilience4j Config
 resilience4j:
   circuitbreaker:
     configs:
@@ -33,9 +32,32 @@ resilience4j:
         slidingWindowSize: 10
         minimumNumberOfCalls: 5
         failureRateThreshold: 50
-        waitDurationInOpenState: 5s
+        waitDurationInOpenState: 10s
         permittedNumberOfCallsInHalfOpenState: 3
         automaticTransitionFromOpenToHalfOpenEnabled: true
+    instances:
+      project-service:
+        baseConfig: default
+      task-service:
+        baseConfig: default
+      user-service:
+        baseConfig: default
+  retry:
+    configs:
+      default:
+        maxAttempts: 3
+        waitDuration: 500ms
+    instances:
+      project-service:
+        baseConfig: default
+      task-service:
+        baseConfig: default
+      user-service:
+        baseConfig: default
+  timelimiter:
+    configs:
+      default:
+        timeoutDuration: 3s
 
 eureka:
   instance:
@@ -45,33 +67,27 @@ eureka:
     prefer-ip-address: true
   client:
     serviceUrl:
-      defaultZone: http://${EUREKA_HOST:discovery-service}:8761/eureka/
+      defaultZone: http://${EUREKA_HOST:localhost}:${EUREKA_PORT:8761}/eureka/
 
 management:
   endpoints:
     web:
       exposure:
-        include: "*"
+        include: "*" # Prometheus, Health, Metrics...
+  metrics:
+    tags:
+      application: ${spring.application.name}
   endpoint:
     health:
       show-details: "ALWAYS"
-  info:
-    env:
-      enabled: true
-    build:
-      enabled: true
-
   tracing:
     sampling:
       probability: 1.0
   zipkin:
     tracing:
-      endpoint: http://${ZIPKIN_HOST:zipkin}:9411/api/v2/spans
+      endpoint: http://${ZIPKIN_HOST:localhost}:${ZIPKIN_PORT:9411}/api/v2/spans
 
 info:
   application:
     name: ${spring.application.name}
-    description: Ticketing Application
     version: '@project.version@'
-    spring-cloud-version: '@spring-cloud.version@'
-    spring-boot-version: '@project.parent.version@'
