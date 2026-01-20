@@ -1,0 +1,14 @@
+global:
+  scrape_interval: 10s
+  evaluation_interval: 10s
+
+scrape_configs:
+  - job_name: 'ticketing_microservices'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets:
+          - 'user-service:9093'
+          - 'project-service:9091'
+          - 'task-service:9092'
+          - 'gateway-service:8762'
+          - 'discovery-service:8761'

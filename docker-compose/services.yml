@@ -1,12 +1,14 @@
 services:
+  # --- INFRASTRUCTURE ---
   database:
     restart: "no"
     image: postgres:16
+    container_name: database
     ports:
-      - "5435:5432"
+      - "${DB_PORT:-5432}:5432" # .env'den okur, yoksa 5432 kullanır
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: ${DB_USERNAME:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
       POSTGRES_DB: ticketing-app
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U postgres" ]
@@ -15,7 +17,13 @@ services:
       retries: 5
     networks: [ backend ]
 
-
+  zipkin:
+    image: openzipkin/zipkin
+    container_name: zipkin
+    ports:
+      - "${ZIPKIN_PORT:-9411}:9411"
+    networks:
+      - backend
 
   discovery-service:
     build:
@@ -24,8 +32,14 @@ services:
       args:
         MODULE: discovery-service
     image: discovery-service:dev
+    container_name: discovery-service
     ports:
-      - "8761:8761"
+      - "${DISCOVERY_PORT:-8761}:8761"
+    environment:
+      - SERVER_PORT=8761
+      - EUREKA_HOST=discovery-service
+      - ZIPKIN_HOST=zipkin
+      - ZIPKIN_PORT=9411
     healthcheck:
       test: [ "CMD-SHELL", "curl -f http://localhost:8761/actuator/health || exit 1" ]
       interval: 15s
@@ -34,6 +48,7 @@ services:
       start_period: 30s
     networks: [ backend ]
 
+  # --- MICROSERVICES ---
   user-service:
     build:
       context: ..
@@ -41,15 +56,24 @@ services:
       args:
         MODULE: user-service
     image: user-service:dev
+    container_name: user-service
     ports:
-      - "9090:9090"
+      - "${USER_PORT:-9093}:9093"
+    environment:
+      - SERVER_PORT=9093
+      - DB_HOST=database
+      - DB_PORT=5432
+      - ZIPKIN_HOST=zipkin
+      - ZIPKIN_PORT=9411
+      - EUREKA_HOST=discovery-service
+      - EUREKA_PORT=8761
     depends_on:
       database:
         condition: service_healthy
       discovery-service:
         condition: service_healthy
     healthcheck:
-      test: [ "CMD-SHELL", "curl -f http://localhost:9090/actuator/health || exit 1" ]
+      test: [ "CMD-SHELL", "curl -f http://localhost:9093/actuator/health || exit 1" ]
       interval: 20s
       timeout: 5s
       retries: 5
@@ -63,8 +87,17 @@ services:
       args:
         MODULE: project-service
     image: project-service:dev
+    container_name: project-service
     ports:
-      - "9091:9091"
+      - "${PROJECT_PORT:-9091}:9091"
+    environment:
+      - SERVER_PORT=9091
+      - DB_HOST=database
+      - DB_PORT=5432
+      - ZIPKIN_HOST=zipkin
+      - ZIPKIN_PORT=9411
+      - EUREKA_HOST=discovery-service
+      - EUREKA_PORT=8761
     depends_on:
       database:
         condition: service_healthy
@@ -85,8 +118,17 @@ services:
       args:
         MODULE: task-service
     image: task-service:dev
+    container_name: task-service
     ports:
-      - "9092:9092"
+      - "${TASK_PORT:-9092}:9092"
+    environment:
+      - SERVER_PORT=9092
+      - DB_HOST=database
+      - DB_PORT=5432
+      - ZIPKIN_HOST=zipkin
+      - ZIPKIN_PORT=9411
+      - EUREKA_HOST=discovery-service
+      - EUREKA_PORT=8761
     depends_on:
       database:
         condition: service_healthy
@@ -107,13 +149,43 @@ services:
       args:
         MODULE: gateway-service
     image: gateway-service:dev
+    container_name: gateway-service
     ports:
-      - "8762:8762"
+      - "${GATEWAY_PORT:-8762}:8762"
+    environment:
+      - SERVER_PORT=8762
+      - ZIPKIN_HOST=zipkin
+      - ZIPKIN_PORT=9411
+      - EUREKA_HOST=discovery-service
+      - EUREKA_PORT=8761
+    networks:
+      - backend
+
+  # --- MONITORING ---
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      # Config dosyasını içeri atıyoruz
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    networks:
+      - backend
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      # Datasource ayarını içeri atıyoruz (Otomatik Bağlantı İçin)
+      - ./grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
     depends_on:
-      - discovery-service
-      - user-service
-      - project-service
-      - task-service
+      - prometheus
     networks:
       - backend
 
