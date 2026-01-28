@@ -5,6 +5,7 @@ import com.iamhusrev.entity.ResponseWrapper;
 import com.iamhusrev.enums.Status;
 import com.iamhusrev.service.TaskService;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,15 +14,11 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/task")
+@RequiredArgsConstructor
 public class TaskController {
 
     private final TaskService taskService;
     private final TaskFallbackHandler fallbackHandler;
-
-    public TaskController(TaskService taskService, TaskFallbackHandler fallbackHandler) {
-        this.taskService = taskService;
-        this.fallbackHandler = fallbackHandler;
-    }
 
     @GetMapping
     @CircuitBreaker(name = "task-service", fallbackMethod = "getTasksFallback")

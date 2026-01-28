@@ -1,28 +1,121 @@
 package com.iamhusrev.service;
 
 import com.iamhusrev.dto.ProjectDTO;
+import com.iamhusrev.dto.UserDTO;
+import com.iamhusrev.dto.UserResponseDTO;
+import com.iamhusrev.entity.Project;
 import com.iamhusrev.entity.User;
+import com.iamhusrev.enums.Status;
 import com.iamhusrev.exception.ProjectServiceException;
+import com.iamhusrev.repository.ProjectRepository;
+import com.iamhusrev.util.MapperUtil;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
-public interface ProjectService {
+@Service
+@RequiredArgsConstructor
+public class ProjectService {
 
-    ProjectDTO getByProjectCode(String code);
+    private final ProjectRepository projectRepository;
+    private final MapperUtil mapperUtil;
+    private final UserClientService userClientService;
 
-    List<ProjectDTO> listAllProjects();
 
-    ProjectDTO save(ProjectDTO dto) throws ProjectServiceException;
+    public ProjectDTO getByProjectCode(String code) {
+        Project project = projectRepository.findByProjectCode(code);
+        if (project == null) {
+            return null;
+        }
+        return mapperUtil.convert(project, new ProjectDTO());
+    }
 
-    ProjectDTO update(ProjectDTO dto) throws ProjectServiceException;
+    public List<ProjectDTO> listAllProjects() {
+        List<Project> list = projectRepository.findAll();
+        return list.stream().map(obj -> mapperUtil.convert(obj, new ProjectDTO())).collect(Collectors.toList());
+    }
 
-    void delete(String code) throws ProjectServiceException;
+    public ProjectDTO save(ProjectDTO dto) throws ProjectServiceException {
+        Project foundProject = projectRepository.findByProjectCode(dto.getProjectCode());
+        if (foundProject != null) {
+            throw new ProjectServiceException("Project with this code already existing");
+        }
+        Project obj = mapperUtil.convert(dto, new Project());
+        Project createdProject = projectRepository.save(obj);
+        return mapperUtil.convert(createdProject, new ProjectDTO());
+    }
 
-    ProjectDTO complete(String projectCode) throws ProjectServiceException;
+    public ProjectDTO update(ProjectDTO dto) throws ProjectServiceException {
 
-    List<ProjectDTO> listAllProjectDetails(String userName) throws ProjectServiceException;
+        Project project = projectRepository.findByProjectCode(dto.getProjectCode());
 
-    List<ProjectDTO> readAllByAssignedManager(User user);
+        if (project == null) {
+            throw new ProjectServiceException("Project does not exist");
+        }
 
-    List<ProjectDTO> listAllNonCompletedProjects();
+        Project convertedProject = mapperUtil.convert(dto, new Project());
+
+        Project updatedProject = projectRepository.save(convertedProject);
+
+        return mapperUtil.convert(updatedProject, new ProjectDTO());
+
+    }
+
+
+    public void delete(String code) {
+        Project project = projectRepository.findByProjectCode(code);
+        project.setIsDeleted(true);
+        project.setProjectCode(project.getProjectCode() + "-" + project.getId());
+        projectRepository.save(project);
+    }
+
+    public ProjectDTO complete(String projectCode) {
+        Project project = projectRepository.findByProjectCode(projectCode);
+        project.setProjectStatus(Status.COMPLETE);
+        Project completedProject = projectRepository.save(project);
+        return mapperUtil.convert(completedProject, new ProjectDTO());
+    }
+
+    public List<ProjectDTO> listAllProjectDetails(String userName) throws ProjectServiceException {
+
+        UserResponseDTO userResponseDto = (UserResponseDTO) userClientService.getUserByUserName(userName).getData();
+
+        UserDTO user = userResponseDto.getData();
+
+        if (user != null) {
+            List<Project> list = projectRepository.findAllByAssignedManagerId(user.getId());
+
+            if (list.isEmpty()) {
+                throw new ProjectServiceException("This manager does not have any project assigned");
+            }
+
+            return list.stream().map(project -> {
+                ProjectDTO projectDTO = new ProjectDTO();
+                projectDTO.setProjectDetail(project.getProjectDetail());
+                projectDTO.setProjectStatus(project.getProjectStatus());
+                projectDTO.setProjectName(project.getProjectName());
+                projectDTO.setProjectCode(project.getProjectCode());
+                projectDTO.setAssignedManager(user);
+                return projectDTO;
+            }).collect(Collectors.toList());
+        }
+        throw new ProjectServiceException("user couldn't find");
+    }
+
+
+    public List<ProjectDTO> readAllByAssignedManager(User user) {
+        List<Project> list = projectRepository.findAllByAssignedManager(user);
+        return list.stream().map(obj -> mapperUtil.convert(obj, new ProjectDTO())).collect(Collectors.toList());
+    }
+
+    public List<ProjectDTO> listAllNonCompletedProjects() {
+        return projectRepository.findAllByProjectStatusIsNot(Status.COMPLETE)
+                .stream()
+                .map(project -> mapperUtil.convert(project, new ProjectDTO()))
+                .collect(Collectors.toList());
+    }
+
+
 }

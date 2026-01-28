@@ -4,60 +4,7 @@ server:
 spring:
   application:
     name: gateway-service
-  cloud:
-    gateway:
-      discovery:
-        locator:
-          enabled: true
-          lower-case-service-id: true
-      routes:
-        - id: user-service
-          uri: lb://user-service
-          predicates:
-            - Path=/iamhusrev/dev/user/**
-          filters:
-            - RewritePath=/iamhusrev/dev/user/(?<segment>.*),/$\{segment}
-        - id: project-service
-          uri: lb://project-service
-          predicates:
-            - Path=/iamhusrev/dev/project/**
-          filters:
-            - RewritePath=/iamhusrev/dev/project/(?<segment>.*),/$\{segment}
-        - id: task-service
-          uri: lb://task-service
-          predicates:
-            - Path=/iamhusrev/dev/task/**
-          filters:
-            - RewritePath=/iamhusrev/dev/task/(?<segment>.*),/$\{segment}
-
-eureka:
-  instance:
-    status-page-url-path: http://localhost:${server.port}/actuator
-    health-check-url-path: http://localhost:${server.port}/actuator/health
-    instance-id: ${spring.application.name}:${server.port}
-    prefer-ip-address: true
-  client:
-    serviceUrl:
-      defaultZone: http://${EUREKA_HOST:localhost}:${EUREKA_PORT:8761}/eureka/
-
-management:
-  endpoints:
-    web:
-      exposure:
-        include: "*"
-  endpoint:
-    health:
-      show-details: "ALWAYS"
-    gateway:
-      enabled: true
-  tracing:
-    sampling:
-      probability: 1.0
-  zipkin:
-    tracing:
-      endpoint: http://${ZIPKIN_HOST:localhost}:${ZIPKIN_PORT:9411}/api/v2/spans
-
-info:
-  application:
-    name: ${spring.application.name}
-    version: '@project.version@'
+  config:
+    import: "optional:configserver:http://${CONFIG_SERVER_HOST:localhost}:8888/"
+  profiles:
+    active: default

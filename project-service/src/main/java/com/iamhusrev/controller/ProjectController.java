@@ -5,6 +5,7 @@ import com.iamhusrev.entity.ResponseWrapper;
 import com.iamhusrev.exception.ProjectServiceException;
 import com.iamhusrev.service.ProjectService;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,15 +14,11 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/project")
+@RequiredArgsConstructor
 public class ProjectController {
 
     private final ProjectService projectService;
     private final ProjectFallbackHandler fallbackHandler;
-
-    public ProjectController(ProjectService projectService, ProjectFallbackHandler fallbackHandler) {
-        this.projectService = projectService;
-        this.fallbackHandler = fallbackHandler;
-    }
 
     @GetMapping
     @CircuitBreaker(name = "project-service", fallbackMethod = "getProjectsFallback")
@@ -32,7 +29,7 @@ public class ProjectController {
 
     @GetMapping("/{code}")
     @CircuitBreaker(name = "project-service", fallbackMethod = "getByCodeFallback")
-    public ResponseEntity<ResponseWrapper> getProjectByCode(@PathVariable("code") String code) {
+    public ResponseEntity<ResponseWrapper> getProjectByCode(@PathVariable String code) {
         ProjectDTO projectDTO = projectService.getByProjectCode(code);
         return ResponseEntity.ok(new ResponseWrapper("Project is successfully retrieved", projectDTO, HttpStatus.OK));
     }

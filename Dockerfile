@@ -6,6 +6,7 @@ WORKDIR /build
 COPY pom.xml .
 COPY app-domain-model/pom.xml app-domain-model/pom.xml
 COPY app-client-management/pom.xml app-client-management/pom.xml
+COPY config-server/pom.xml config-server/pom.xml
 COPY user-service/pom.xml user-service/pom.xml
 COPY project-service/pom.xml project-service/pom.xml
 COPY task-service/pom.xml task-service/pom.xml

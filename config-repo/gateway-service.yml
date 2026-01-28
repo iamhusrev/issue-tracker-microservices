@@ -1,0 +1,29 @@
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: none
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
+      routes:
+        - id: user-service
+          uri: lb://user-service
+          predicates:
+            - Path=/iamhusrev/dev/user/**
+          filters:
+            - RewritePath=/iamhusrev/dev/user/(?<segment>.*),/$\{segment}
+        - id: project-service
+          uri: lb://project-service
+          predicates:
+            - Path=/iamhusrev/dev/project/**
+          filters:
+            - RewritePath=/iamhusrev/dev/project/(?<segment>.*),/$\{segment}
+        - id: task-service
+          uri: lb://task-service
+          predicates:
+            - Path=/iamhusrev/dev/task/**
+          filters:
+            - RewritePath=/iamhusrev/dev/task/(?<segment>.*),/$\{segment}

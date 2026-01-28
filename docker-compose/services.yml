@@ -1,11 +1,11 @@
 services:
-  # --- INFRASTRUCTURE ---
+  # 1. DATABASE
   database:
     restart: "no"
     image: postgres:16
     container_name: database
     ports:
-      - "${DB_PORT:-5432}:5432" # .env'den okur, yoksa 5432 kullanır
+      - "${DB_PORT:-5432}:5432"
     environment:
       POSTGRES_USER: ${DB_USERNAME:-postgres}
       POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
@@ -17,14 +17,15 @@ services:
       retries: 5
     networks: [ backend ]
 
+  # 2. ZIPKIN
   zipkin:
     image: openzipkin/zipkin
     container_name: zipkin
     ports:
       - "${ZIPKIN_PORT:-9411}:9411"
-    networks:
-      - backend
+    networks: [ backend ]
 
+  # 3. DISCOVERY SERVICE (ARTIK İLK BU BAŞLIYOR)
   discovery-service:
     build:
       context: ..
@@ -40,15 +41,44 @@ services:
       - EUREKA_HOST=discovery-service
       - ZIPKIN_HOST=zipkin
       - ZIPKIN_PORT=9411
+      # DİKKAT: CONFIG_SERVER_HOST SİLİNDİ!
     healthcheck:
       test: [ "CMD-SHELL", "curl -f http://localhost:8761/actuator/health || exit 1" ]
-      interval: 15s
+      interval: 10s
       timeout: 5s
       retries: 5
-      start_period: 30s
+      start_period: 10s
     networks: [ backend ]
 
-  # --- MICROSERVICES ---
+  # 4. CONFIG SERVER (Discovery'den Sonra Başlar)
+  config-server:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+      args:
+        MODULE: config-server
+    image: config-server:dev
+    container_name: config-server
+    ports:
+      - "8888:8888"
+    environment:
+      - SERVER_PORT=8888
+      - EUREKA_HOST=discovery-service
+      - ZIPKIN_HOST=zipkin
+    volumes:
+      - ./../config-repo:/app/config-repo
+    depends_on:
+      discovery-service:
+        condition: service_started
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -f http://localhost:8888/actuator/health || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    networks: [ backend ]
+
+  # 5. MICROSERVICES (Config Server Healthy Olunca Başlar)
   user-service:
     build:
       context: ..
@@ -61,23 +91,20 @@ services:
       - "${USER_PORT:-9093}:9093"
     environment:
       - SERVER_PORT=9093
+      - CONFIG_SERVER_HOST=config-server
       - DB_HOST=database
-      - DB_PORT=5432
+      - DB_USERNAME=${DB_USERNAME:-postgres}
+      - DB_PASSWORD=${DB_PASSWORD:-postgres}
       - ZIPKIN_HOST=zipkin
       - ZIPKIN_PORT=9411
       - EUREKA_HOST=discovery-service
-      - EUREKA_PORT=8761
     depends_on:
+      config-server:
+        condition: service_healthy # Config Server şart (DB şifresi için)
       database:
         condition: service_healthy
       discovery-service:
-        condition: service_healthy
-    healthcheck:
-      test: [ "CMD-SHELL", "curl -f http://localhost:9093/actuator/health || exit 1" ]
-      interval: 20s
-      timeout: 5s
-      retries: 5
-      start_period: 40s
+        condition: service_started
     networks: [ backend ]
 
   project-service:
@@ -92,23 +119,20 @@ services:
       - "${PROJECT_PORT:-9091}:9091"
     environment:
       - SERVER_PORT=9091
+      - CONFIG_SERVER_HOST=config-server
       - DB_HOST=database
-      - DB_PORT=5432
+      - DB_USERNAME=${DB_USERNAME:-postgres}
+      - DB_PASSWORD=${DB_PASSWORD:-postgres}
       - ZIPKIN_HOST=zipkin
       - ZIPKIN_PORT=9411
       - EUREKA_HOST=discovery-service
-      - EUREKA_PORT=8761
     depends_on:
+      config-server:
+        condition: service_healthy
       database:
         condition: service_healthy
       discovery-service:
-        condition: service_healthy
-    healthcheck:
-      test: [ "CMD-SHELL", "curl -f http://localhost:9091/actuator/health || exit 1" ]
-      interval: 20s
-      timeout: 5s
-      retries: 5
-      start_period: 40s
+        condition: service_started
     networks: [ backend ]
 
   task-service:
@@ -123,25 +147,23 @@ services:
       - "${TASK_PORT:-9092}:9092"
     environment:
       - SERVER_PORT=9092
+      - CONFIG_SERVER_HOST=config-server
       - DB_HOST=database
-      - DB_PORT=5432
+      - DB_USERNAME=${DB_USERNAME:-postgres}
+      - DB_PASSWORD=${DB_PASSWORD:-postgres}
       - ZIPKIN_HOST=zipkin
       - ZIPKIN_PORT=9411
       - EUREKA_HOST=discovery-service
-      - EUREKA_PORT=8761
     depends_on:
+      config-server:
+        condition: service_healthy
       database:
         condition: service_healthy
       discovery-service:
-        condition: service_healthy
-    healthcheck:
-      test: [ "CMD-SHELL", "curl -f http://localhost:9092/actuator/health || exit 1" ]
-      interval: 20s
-      timeout: 5s
-      retries: 5
-      start_period: 40s
+        condition: service_started
     networks: [ backend ]
 
+  # 6. GATEWAY SERVICE
   gateway-service:
     build:
       context: ..
@@ -154,40 +176,38 @@ services:
       - "${GATEWAY_PORT:-8762}:8762"
     environment:
       - SERVER_PORT=8762
+      - CONFIG_SERVER_HOST=config-server
+      - EUREKA_HOST=discovery-service
       - ZIPKIN_HOST=zipkin
       - ZIPKIN_PORT=9411
-      - EUREKA_HOST=discovery-service
-      - EUREKA_PORT=8761
-    networks:
-      - backend
+    depends_on:
+      config-server:
+        condition: service_healthy
+      discovery-service:
+        condition: service_started
+    networks: [ backend ]
 
-  # --- MONITORING ---
+  # MONITORING
   prometheus:
     image: prom/prometheus:latest
     container_name: prometheus
-    ports:
-      - "9090:9090"
+    ports: ["9090:9090"]
     volumes:
-      # Config dosyasını içeri atıyoruz
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
-    networks:
-      - backend
+    networks: [ backend ]
 
   grafana:
     image: grafana/grafana:latest
     container_name: grafana
-    ports:
-      - "3000:3000"
+    ports: ["3000:3000"]
     environment:
       - GF_SECURITY_ADMIN_USER=admin
       - GF_SECURITY_ADMIN_PASSWORD=admin
     volumes:
-      # Datasource ayarını içeri atıyoruz (Otomatik Bağlantı İçin)
       - ./grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
     depends_on:
       - prometheus
-    networks:
-      - backend
+    networks: [ backend ]
 
 networks:
   backend:

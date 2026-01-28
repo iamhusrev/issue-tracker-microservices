@@ -4,38 +4,25 @@ server:
 spring:
   application:
     name: discovery-service
+  cloud:
+    config:
+      enabled: false
+      import-check:
+        enabled: false
 
 eureka:
   instance:
-    hostname: ${EUREKA_HOST:localhost}
+    hostname: localhost
   client:
-    register-with-eureka: false
+    register-with-eureka: false # Kendisi server olduğu için kendine kayıt olmaz
     fetch-registry: false
     serviceUrl:
       defaultZone: http://${EUREKA_HOST:localhost}:${SERVER_PORT:8761}/eureka/
 
 management:
-  endpoints:
-    web:
-      exposure:
-        include: "*"
-  endpoint:
-    health:
-      show-details: "ALWAYS"
-  info:
-    env:
-      enabled: true
-    build:
-      enabled: true
-  tracing:
-    sampling:
-      probability: 1.0
   zipkin:
     tracing:
       endpoint: http://${ZIPKIN_HOST:localhost}:${ZIPKIN_PORT:9411}/api/v2/spans
-
-info:
-  application:
-    name: ${spring.application.name}
-    description: Ticketing Application (Discovery Server)
-    version: '@project.version@'
+  tracing:
+    sampling:
+      probability: 1.0
