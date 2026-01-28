@@ -30,7 +30,7 @@ public class UserService {
     public UserDTO findByUserName(String username) throws AccessDeniedException {
         User user = userRepository.findByUserName(username);
         if (user == null) {
-            throw new AccessDeniedException("User Not Found");
+            return null;
         }
         return mapperUtil.convert(user, new UserDTO());
     }
