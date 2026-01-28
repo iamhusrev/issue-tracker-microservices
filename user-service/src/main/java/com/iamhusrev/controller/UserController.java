@@ -5,6 +5,7 @@ import com.iamhusrev.entity.ResponseWrapper;
 import com.iamhusrev.exception.UserServiceException;
 import com.iamhusrev.service.UserService;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,15 +15,12 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/user")
+@RequiredArgsConstructor
 public class UserController {
 
     private final UserService userService;
     private final UserFallbackHandler fallbackHandler;
 
-    public UserController(UserService userService, UserFallbackHandler fallbackHandler) {
-        this.userService = userService;
-        this.fallbackHandler = fallbackHandler;
-    }
 
     @GetMapping
     @CircuitBreaker(name = "user-service", fallbackMethod = "getUsersFallback")
@@ -58,10 +56,6 @@ public class UserController {
         userService.deleteByUserName(userName);
         return ResponseEntity.ok(new ResponseWrapper("User is successfully deleted", HttpStatus.OK));
     }
-
-    // -------------------------------------------------------------------------
-    // FALLBACK BRIDGE METHODS
-    // -------------------------------------------------------------------------
 
     public ResponseEntity<ResponseWrapper> getUsersFallback(Throwable t) {
         return fallbackHandler.handleListFallback(t);
