@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/task")
+@RequestMapping("/task")
 @RequiredArgsConstructor
 public class TaskController {
 
@@ -62,7 +62,7 @@ public class TaskController {
         return ResponseEntity.ok(new ResponseWrapper("Task are successfully retrieved", taskDTOList, HttpStatus.OK));
     }
 
-    @PutMapping("/employee/update/")
+    @PutMapping("/employee/update")
     @CircuitBreaker(name = "task-service", fallbackMethod = "createUpdateFallback")
     public ResponseEntity<ResponseWrapper> employeeUpdateTasks(@RequestBody TaskDTO task) {
         taskService.updateStatus(task);

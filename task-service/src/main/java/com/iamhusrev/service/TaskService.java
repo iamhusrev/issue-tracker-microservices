@@ -7,7 +7,7 @@ import com.iamhusrev.entity.Project;
 import com.iamhusrev.entity.Task;
 import com.iamhusrev.entity.User;
 import com.iamhusrev.enums.Status;
-import com.iamhusrev.respository.TaskRepository;
+import com.iamhusrev.repository.TaskRepository;
 import com.iamhusrev.util.MapperUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

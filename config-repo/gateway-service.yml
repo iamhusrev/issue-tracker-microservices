@@ -9,21 +9,27 @@ spring:
           enabled: true
           lower-case-service-id: true
       routes:
+        - id: auth-service
+          uri: lb://user-service
+          predicates:
+            - Path=/iamhusrev/dev/auth, /iamhusrev/dev/auth/**
+          filters:
+            - RewritePath=/iamhusrev/dev/auth(?<segment>.*), /auth$\{segment}
         - id: user-service
           uri: lb://user-service
           predicates:
-            - Path=/iamhusrev/dev/user/**
+            - Path=/iamhusrev/dev/user, /iamhusrev/dev/user/**
           filters:
-            - RewritePath=/iamhusrev/dev/user/(?<segment>.*),/$\{segment}
+            - RewritePath=/iamhusrev/dev/user(?<segment>.*), /user$\{segment}
         - id: project-service
           uri: lb://project-service
           predicates:
-            - Path=/iamhusrev/dev/project/**
+            - Path=/iamhusrev/dev/project, /iamhusrev/dev/project/**
           filters:
-            - RewritePath=/iamhusrev/dev/project/(?<segment>.*),/$\{segment}
+            - RewritePath=/iamhusrev/dev/project(?<segment>.*), /project$\{segment}
         - id: task-service
           uri: lb://task-service
           predicates:
-            - Path=/iamhusrev/dev/task/**
+            - Path=/iamhusrev/dev/task, /iamhusrev/dev/task/**
           filters:
-            - RewritePath=/iamhusrev/dev/task/(?<segment>.*),/$\{segment}
+            - RewritePath=/iamhusrev/dev/task(?<segment>.*), /task$\{segment}

@@ -1,5 +1,8 @@
 # --- GLOBAL CONFIGS ---
 spring:
+  sql:
+    init:
+      mode: always
   jpa:
     properties:
       hibernate:
@@ -7,6 +10,7 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: true
+    defer-datasource-initialization: true
   datasource:
     username: ${DB_USERNAME:postgres}
     password: ${DB_PASSWORD:postgres}

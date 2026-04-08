@@ -1,0 +1,95 @@
+{
+  "nav": {
+    "dashboard": "Dashboard",
+    "users": "Users",
+    "projects": "Projects",
+    "tasks": "Tasks",
+    "myProjects": "My Projects",
+    "myTasks": "My Tasks",
+    "archive": "Archive",
+    "management": "Management",
+    "manager": "Manager",
+    "employee": "Employee"
+  },
+  "auth": {
+    "login": "Sign In",
+    "logout": "Sign Out",
+    "username": "Username",
+    "password": "Password",
+    "loginError": "Invalid username or password"
+  },
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "search": "Search",
+    "loading": "Loading...",
+    "noData": "No data found",
+    "confirm": "Are you sure?",
+    "yes": "Yes",
+    "no": "No",
+    "actions": "Actions",
+    "status": "Status",
+    "total": "Total"
+  },
+  "status": {
+    "OPEN": "Open",
+    "IN_PROGRESS": "In Progress",
+    "UAT_TEST": "UAT Testing",
+    "COMPLETE": "Complete"
+  },
+  "gender": {
+    "MALE": "Male",
+    "FEMALE": "Female"
+  },
+  "user": {
+    "title": "Users",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "userName": "Username",
+    "password": "Password",
+    "role": "Role",
+    "phone": "Phone",
+    "gender": "Gender",
+    "enabled": "Active",
+    "createTitle": "New User",
+    "editTitle": "Edit User"
+  },
+  "project": {
+    "title": "Projects",
+    "name": "Project Name",
+    "code": "Project Code",
+    "manager": "Manager",
+    "startDate": "Start Date",
+    "endDate": "End Date",
+    "detail": "Description",
+    "status": "Status",
+    "completedTasks": "Completed",
+    "pendingTasks": "Pending",
+    "createTitle": "New Project",
+    "editTitle": "Edit Project",
+    "complete": "Complete"
+  },
+  "task": {
+    "title": "Tasks",
+    "subject": "Subject",
+    "detail": "Detail",
+    "status": "Status",
+    "employee": "Employee",
+    "project": "Project",
+    "date": "Date",
+    "createTitle": "New Task",
+    "editTitle": "Edit Task"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "totalUsers": "Total Users",
+    "activeProjects": "Active Projects",
+    "pendingTasks": "Pending Tasks",
+    "completedTasks": "Completed Tasks",
+    "taskDistribution": "Task Distribution",
+    "projectStatus": "Project Status"
+  }
+}

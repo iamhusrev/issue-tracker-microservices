@@ -1,4 +1,4 @@
-package com.iamhusrev.respository;
+package com.iamhusrev.repository;
 
 import com.iamhusrev.entity.Project;
 import com.iamhusrev.entity.Task;

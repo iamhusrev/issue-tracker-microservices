@@ -7,6 +7,7 @@ import com.iamhusrev.repository.UserRepository;
 import com.iamhusrev.util.MapperUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.nio.file.AccessDeniedException;
@@ -20,6 +21,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final MapperUtil mapperUtil;
+    private final PasswordEncoder passwordEncoder;
 
 
     public List<UserDTO> listAllUsers() {
@@ -44,6 +46,7 @@ public class UserService {
         }
 
         User user = mapperUtil.convert(dto, new User());
+        user.setPassWord(passwordEncoder.encode(dto.getPassWord()));
 
         User save = userRepository.save(user);
 

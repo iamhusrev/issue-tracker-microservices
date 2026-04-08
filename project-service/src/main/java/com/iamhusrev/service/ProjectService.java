@@ -56,6 +56,7 @@ public class ProjectService {
         }
 
         Project convertedProject = mapperUtil.convert(dto, new Project());
+        convertedProject.setId(project.getId());
 
         Project updatedProject = projectRepository.save(convertedProject);
 

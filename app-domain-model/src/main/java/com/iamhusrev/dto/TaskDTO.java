@@ -1,6 +1,8 @@
 package com.iamhusrev.dto;
 
 import com.iamhusrev.enums.Status;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -8,6 +10,8 @@ import lombok.Setter;
 import java.time.LocalDate;
 
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Getter
 @Setter
 public class TaskDTO {

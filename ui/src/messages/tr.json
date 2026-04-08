@@ -1,0 +1,95 @@
+{
+  "nav": {
+    "dashboard": "Dashboard",
+    "users": "Kullanıcılar",
+    "projects": "Projeler",
+    "tasks": "Görevler",
+    "myProjects": "Projelerim",
+    "myTasks": "Görevlerim",
+    "archive": "Arşiv",
+    "management": "Yönetim",
+    "manager": "Yönetici",
+    "employee": "Çalışan"
+  },
+  "auth": {
+    "login": "Giriş Yap",
+    "logout": "Çıkış",
+    "username": "Kullanıcı Adı",
+    "password": "Şifre",
+    "loginError": "Geçersiz kullanıcı adı veya şifre"
+  },
+  "common": {
+    "save": "Kaydet",
+    "cancel": "İptal",
+    "delete": "Sil",
+    "edit": "Düzenle",
+    "create": "Oluştur",
+    "search": "Ara",
+    "loading": "Yükleniyor...",
+    "noData": "Veri bulunamadı",
+    "confirm": "Emin misiniz?",
+    "yes": "Evet",
+    "no": "Hayır",
+    "actions": "İşlemler",
+    "status": "Durum",
+    "total": "Toplam"
+  },
+  "status": {
+    "OPEN": "Açık",
+    "IN_PROGRESS": "Devam Ediyor",
+    "UAT_TEST": "UAT Test",
+    "COMPLETE": "Tamamlandı"
+  },
+  "gender": {
+    "MALE": "Erkek",
+    "FEMALE": "Kadın"
+  },
+  "user": {
+    "title": "Kullanıcılar",
+    "firstName": "Ad",
+    "lastName": "Soyad",
+    "userName": "Kullanıcı Adı",
+    "password": "Şifre",
+    "role": "Rol",
+    "phone": "Telefon",
+    "gender": "Cinsiyet",
+    "enabled": "Aktif",
+    "createTitle": "Yeni Kullanıcı",
+    "editTitle": "Kullanıcı Düzenle"
+  },
+  "project": {
+    "title": "Projeler",
+    "name": "Proje Adı",
+    "code": "Proje Kodu",
+    "manager": "Yönetici",
+    "startDate": "Başlangıç",
+    "endDate": "Bitiş",
+    "detail": "Açıklama",
+    "status": "Durum",
+    "completedTasks": "Tamamlanan",
+    "pendingTasks": "Bekleyen",
+    "createTitle": "Yeni Proje",
+    "editTitle": "Proje Düzenle",
+    "complete": "Tamamla"
+  },
+  "task": {
+    "title": "Görevler",
+    "subject": "Konu",
+    "detail": "Detay",
+    "status": "Durum",
+    "employee": "Çalışan",
+    "project": "Proje",
+    "date": "Tarih",
+    "createTitle": "Yeni Görev",
+    "editTitle": "Görev Düzenle"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "totalUsers": "Toplam Kullanıcı",
+    "activeProjects": "Aktif Proje",
+    "pendingTasks": "Bekleyen Görev",
+    "completedTasks": "Tamamlanan Görev",
+    "taskDistribution": "Görev Dağılımı",
+    "projectStatus": "Proje Durumları"
+  }
+}
