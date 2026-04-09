@@ -5,6 +5,7 @@ import com.iamhusrev.entity.ResponseWrapper;
 import com.iamhusrev.exception.UserServiceException;
 import com.iamhusrev.service.UserService;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -38,14 +39,14 @@ public class UserController {
 
     @PostMapping
     @CircuitBreaker(name = "user-service", fallbackMethod = "createUpdateFallback")
-    public ResponseEntity<ResponseWrapper> createUser(@RequestBody UserDTO user) throws UserServiceException {
+    public ResponseEntity<ResponseWrapper> createUser(@Valid @RequestBody UserDTO user) throws UserServiceException {
         userService.save(user);
         return ResponseEntity.status(HttpStatus.CREATED).body(new ResponseWrapper("User is successfully created", HttpStatus.CREATED));
     }
 
     @PutMapping
     @CircuitBreaker(name = "user-service", fallbackMethod = "createUpdateFallback")
-    public ResponseEntity<ResponseWrapper> updateUser(@RequestBody UserDTO user) throws UserServiceException, AccessDeniedException {
+    public ResponseEntity<ResponseWrapper> updateUser(@Valid @RequestBody UserDTO user) throws UserServiceException, AccessDeniedException {
         userService.update(user);
         return ResponseEntity.ok(new ResponseWrapper("User is successfully updated", user, HttpStatus.OK));
     }

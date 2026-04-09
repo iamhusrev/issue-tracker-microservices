@@ -5,6 +5,7 @@ import com.iamhusrev.entity.ResponseWrapper;
 import com.iamhusrev.enums.Status;
 import com.iamhusrev.service.TaskService;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -36,7 +37,7 @@ public class TaskController {
 
     @PostMapping
     @CircuitBreaker(name = "task-service", fallbackMethod = "createUpdateFallback")
-    public ResponseEntity<ResponseWrapper> createTask(@RequestBody TaskDTO taskDTO) {
+    public ResponseEntity<ResponseWrapper> createTask(@Valid @RequestBody TaskDTO taskDTO) {
         taskService.save(taskDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(new ResponseWrapper("Task is successfully created", HttpStatus.CREATED));
     }
@@ -50,16 +51,16 @@ public class TaskController {
 
     @PutMapping
     @CircuitBreaker(name = "task-service", fallbackMethod = "createUpdateFallback")
-    public ResponseEntity<ResponseWrapper> updateTask(@RequestBody TaskDTO taskDTO) {
+    public ResponseEntity<ResponseWrapper> updateTask(@Valid @RequestBody TaskDTO taskDTO) {
         taskService.update(taskDTO);
         return ResponseEntity.ok(new ResponseWrapper("Task is successfully updated", HttpStatus.OK));
     }
 
-    @GetMapping("/employee/pending-tasks")
-    @CircuitBreaker(name = "task-service", fallbackMethod = "getTasksFallback") // Reusing list fallback
-    public ResponseEntity<ResponseWrapper> employeePendingTasks() {
-        List<TaskDTO> taskDTOList = taskService.listAllTasksByStatusIsNot(Status.COMPLETE);
-        return ResponseEntity.ok(new ResponseWrapper("Task are successfully retrieved", taskDTOList, HttpStatus.OK));
+    @GetMapping("/employee/pending-tasks/{userName}")
+    @CircuitBreaker(name = "task-service", fallbackMethod = "employeePendingTasksFallback")
+    public ResponseEntity<ResponseWrapper> employeePendingTasks(@PathVariable String userName) {
+        List<TaskDTO> taskDTOList = taskService.listAllTasksByStatusIsNot(Status.COMPLETE, userName);
+        return ResponseEntity.ok(new ResponseWrapper("Tasks are successfully retrieved", taskDTOList, HttpStatus.OK));
     }
 
     @PutMapping("/employee/update/")
@@ -69,10 +70,10 @@ public class TaskController {
         return ResponseEntity.ok(new ResponseWrapper("Task is successfully updated", HttpStatus.OK));
     }
 
-    @GetMapping("/employee/archive")
-    @CircuitBreaker(name = "task-service", fallbackMethod = "getTasksFallback") // Reusing list fallback
-    public ResponseEntity<ResponseWrapper> employeeArchivedTasks() {
-        List<TaskDTO> taskDTOS = taskService.listAllTasksByStatus(Status.COMPLETE);
+    @GetMapping("/employee/archive/{userName}")
+    @CircuitBreaker(name = "task-service", fallbackMethod = "employeeArchivedTasksFallback")
+    public ResponseEntity<ResponseWrapper> employeeArchivedTasks(@PathVariable String userName) {
+        List<TaskDTO> taskDTOS = taskService.listAllTasksByStatus(Status.COMPLETE, userName);
         return ResponseEntity.ok(new ResponseWrapper("Tasks are successfully retrieved", taskDTOS, HttpStatus.OK));
     }
 
@@ -94,5 +95,13 @@ public class TaskController {
 
     public ResponseEntity<ResponseWrapper> deleteTaskFallback(Long taskId, Throwable t) {
         return fallbackHandler.handleActionFallback(taskId, t);
+    }
+
+    public ResponseEntity<ResponseWrapper> employeePendingTasksFallback(String userName, Throwable t) {
+        return fallbackHandler.handleListFallback(t);
+    }
+
+    public ResponseEntity<ResponseWrapper> employeeArchivedTasksFallback(String userName, Throwable t) {
+        return fallbackHandler.handleListFallback(t);
     }
 }

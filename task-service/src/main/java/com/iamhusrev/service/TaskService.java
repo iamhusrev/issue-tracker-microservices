@@ -7,10 +7,11 @@ import com.iamhusrev.entity.Project;
 import com.iamhusrev.entity.Task;
 import com.iamhusrev.entity.User;
 import com.iamhusrev.enums.Status;
-import com.iamhusrev.respository.TaskRepository;
+import com.iamhusrev.repository.TaskRepository;
 import com.iamhusrev.util.MapperUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -36,6 +37,7 @@ public class TaskService {
         return list.stream().map(obj -> mapperUtil.convert(obj, new TaskDTO())).collect(Collectors.toList());
     }
 
+    @Transactional
     public void save(TaskDTO dto) {
         dto.setTaskStatus(Status.OPEN);
         dto.setAssignedDate(LocalDate.now());
@@ -43,6 +45,7 @@ public class TaskService {
         taskRepository.save(task);
     }
 
+    @Transactional
     public void update(TaskDTO dto) {
 
         Optional<Task> task = taskRepository.findById(dto.getId());
@@ -57,6 +60,7 @@ public class TaskService {
 
     }
 
+    @Transactional
     public void delete(Long id) {
 
         Optional<Task> foundTask = taskRepository.findById(id);
@@ -90,9 +94,13 @@ public class TaskService {
         });
     }
 
-    public List<TaskDTO> listAllTasksByStatusIsNot(Status status) {
+    public List<TaskDTO> listAllTasksByStatusIsNot(Status status, String userName) {
 
-        UserResponseDTO userResponseDto = (UserResponseDTO) userClientService.getUserByUserName("john@employee.com").getData();
+        UserResponseDTO userResponseDto = (UserResponseDTO) userClientService.getUserByUserName(userName).getData();
+
+        if (userResponseDto == null || userResponseDto.getData() == null) {
+            throw new IllegalArgumentException("User not found: " + userName);
+        }
 
         User loggedInUser = mapperUtil.convert(userResponseDto.getData(), new User());
 
@@ -100,6 +108,7 @@ public class TaskService {
         return list.stream().map(obj -> mapperUtil.convert(obj, new TaskDTO())).collect(Collectors.toList());
     }
 
+    @Transactional
     public void updateStatus(TaskDTO dto) {
 
         Optional<Task> task = taskRepository.findById(dto.getId());
@@ -111,8 +120,12 @@ public class TaskService {
 
     }
 
-    public List<TaskDTO> listAllTasksByStatus(Status status) {
-        UserResponseDTO userResponseDto = (UserResponseDTO) userClientService.getUserByUserName("john@employee.com").getData();
+    public List<TaskDTO> listAllTasksByStatus(Status status, String userName) {
+        UserResponseDTO userResponseDto = (UserResponseDTO) userClientService.getUserByUserName(userName).getData();
+
+        if (userResponseDto == null || userResponseDto.getData() == null) {
+            throw new IllegalArgumentException("User not found: " + userName);
+        }
 
         User loggedInUser = mapperUtil.convert(userResponseDto.getData(), new User());
 

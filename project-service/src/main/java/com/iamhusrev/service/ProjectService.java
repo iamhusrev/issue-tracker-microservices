@@ -11,6 +11,7 @@ import com.iamhusrev.repository.ProjectRepository;
 import com.iamhusrev.util.MapperUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -37,6 +38,7 @@ public class ProjectService {
         return list.stream().map(obj -> mapperUtil.convert(obj, new ProjectDTO())).collect(Collectors.toList());
     }
 
+    @Transactional
     public ProjectDTO save(ProjectDTO dto) throws ProjectServiceException {
         Project foundProject = projectRepository.findByProjectCode(dto.getProjectCode());
         if (foundProject != null) {
@@ -47,6 +49,7 @@ public class ProjectService {
         return mapperUtil.convert(createdProject, new ProjectDTO());
     }
 
+    @Transactional
     public ProjectDTO update(ProjectDTO dto) throws ProjectServiceException {
 
         Project project = projectRepository.findByProjectCode(dto.getProjectCode());
@@ -56,6 +59,7 @@ public class ProjectService {
         }
 
         Project convertedProject = mapperUtil.convert(dto, new Project());
+        convertedProject.setId(project.getId());
 
         Project updatedProject = projectRepository.save(convertedProject);
 
@@ -64,15 +68,23 @@ public class ProjectService {
     }
 
 
-    public void delete(String code) {
+    @Transactional
+    public void delete(String code) throws ProjectServiceException {
         Project project = projectRepository.findByProjectCode(code);
+        if (project == null) {
+            throw new ProjectServiceException("Project does not exist");
+        }
         project.setIsDeleted(true);
         project.setProjectCode(project.getProjectCode() + "-" + project.getId());
         projectRepository.save(project);
     }
 
-    public ProjectDTO complete(String projectCode) {
+    @Transactional
+    public ProjectDTO complete(String projectCode) throws ProjectServiceException {
         Project project = projectRepository.findByProjectCode(projectCode);
+        if (project == null) {
+            throw new ProjectServiceException("Project does not exist");
+        }
         project.setProjectStatus(Status.COMPLETE);
         Project completedProject = projectRepository.save(project);
         return mapperUtil.convert(completedProject, new ProjectDTO());

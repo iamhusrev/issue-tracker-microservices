@@ -23,12 +23,12 @@ public interface TaskClientService {
     @PutMapping
     ResponseWrapper updateTask(@RequestBody TaskDTO taskDTO);
 
-    @GetMapping("/employee/pending-tasks")
-    ResponseWrapper employeePendingTasks();
+    @GetMapping("/employee/pending-tasks/{userName}")
+    ResponseWrapper employeePendingTasks(@PathVariable("userName") String userName);
 
     @PutMapping("/employee/update/")
     ResponseWrapper employeeUpdateTasks(@RequestBody TaskDTO task);
 
-    @GetMapping("/employee/archive")
-    ResponseWrapper employeeArchivedTasks();
+    @GetMapping("/employee/archive/{userName}")
+    ResponseWrapper employeeArchivedTasks(@PathVariable("userName") String userName);
 }

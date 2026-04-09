@@ -8,6 +8,7 @@ import com.iamhusrev.util.MapperUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.nio.file.AccessDeniedException;
 import java.util.List;
@@ -35,6 +36,7 @@ public class UserService {
         return mapperUtil.convert(user, new UserDTO());
     }
 
+    @Transactional
     public UserDTO save(UserDTO dto) throws UserServiceException {
 
         User foundUser = userRepository.findByUserName(dto.getUserName());
@@ -51,6 +53,7 @@ public class UserService {
 
     }
 
+    @Transactional
     public UserDTO update(UserDTO dto) throws UserServiceException, AccessDeniedException {
 
         User user = userRepository.findByUserName(dto.getUserName());
@@ -69,6 +72,7 @@ public class UserService {
         return findByUserName(dto.getUserName());
     }
 
+    @Transactional
     public void delete(String username) throws UserServiceException {
         User user = userRepository.findByUserName(username);
 
@@ -82,6 +86,7 @@ public class UserService {
         userRepository.save(user);
     }
 
+    @Transactional
     public void deleteByUserName(String username) {
         userRepository.deleteByUserName(username);
     }

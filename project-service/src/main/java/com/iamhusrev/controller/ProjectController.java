@@ -5,6 +5,7 @@ import com.iamhusrev.entity.ResponseWrapper;
 import com.iamhusrev.exception.ProjectServiceException;
 import com.iamhusrev.service.ProjectService;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -36,14 +37,14 @@ public class ProjectController {
 
     @PostMapping
     @CircuitBreaker(name = "project-service", fallbackMethod = "createUpdateFallback")
-    public ResponseEntity<ResponseWrapper> createProject(@RequestBody ProjectDTO project) throws ProjectServiceException {
+    public ResponseEntity<ResponseWrapper> createProject(@Valid @RequestBody ProjectDTO project) throws ProjectServiceException {
         projectService.save(project);
         return ResponseEntity.status(HttpStatus.CREATED).body(new ResponseWrapper("Project is successfully created", HttpStatus.CREATED));
     }
 
     @PutMapping
     @CircuitBreaker(name = "project-service", fallbackMethod = "createUpdateFallback")
-    public ResponseEntity<ResponseWrapper> updateProject(@RequestBody ProjectDTO project) throws ProjectServiceException {
+    public ResponseEntity<ResponseWrapper> updateProject(@Valid @RequestBody ProjectDTO project) throws ProjectServiceException {
         projectService.update(project);
         return ResponseEntity.ok(new ResponseWrapper("Project is successfully updated", project, HttpStatus.OK));
     }

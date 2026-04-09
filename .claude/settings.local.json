@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find /c/Users/iamhu/Projects/issue-tracker-microservices -type d -not -path */.git* -not -path */target* -not -path */.idea* -not -path */node_modules*)",
+      "Bash(cmd.exe /c \"mvn clean compile -q\")",
+      "Read(//c/Users/iamhu/.m2/**)",
+      "Read(//c//**)",
+      "Read(//c/Program Files/**)",
+      "Bash(cmd.exe /c \"echo %MAVEN_HOME%\")",
+      "Bash(cmd.exe /c \"echo %M2_HOME%\")"
+    ]
+  }
+}

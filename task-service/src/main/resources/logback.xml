@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <configuration>
-    <property name="DEV_HOME" value="./user-service/logs"/>
-    <property name="APP_NAME" value="user-service"/>
+    <property name="DEV_HOME" value="./task-service/logs"/>
+    <property name="APP_NAME" value="task-service"/>
 
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <layout class="ch.qos.logback.classic.PatternLayout">
