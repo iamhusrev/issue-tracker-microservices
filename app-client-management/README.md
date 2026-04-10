@@ -10,9 +10,9 @@ This is a non-runnable library module. It defines Feign clients that enable type
 
 | Client | Target Service | Base Path |
 |---|---|---|
-| `UserClientService` | user-service | `/api/v1/user` |
-| `ProjectClientService` | project-service | `/api/v1/project` |
-| `TaskClientService` | task-service | `/api/v1/task` |
+| `UserClientService` | user-service | `/api/user` |
+| `ProjectClientService` | project-service | `/api/project` |
+| `TaskClientService` | task-service | `/api/task` |
 
 ## Fallback Handlers
 

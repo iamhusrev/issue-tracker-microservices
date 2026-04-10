@@ -5,21 +5,21 @@ Microservice for task management within projects, including assignment to employ
 ## Overview
 
 - **Port:** 9092
-- **Base Path:** `/api/v1/task`
+- **Base Path:** `/api/task`
 - **Database:** PostgreSQL
 
 ## API Endpoints
 
 | Method | Path | Description |
 |---|---|---|
-| GET | `/api/v1/task` | List all tasks |
-| GET | `/api/v1/task/{taskId}` | Get task by ID |
-| POST | `/api/v1/task` | Create a new task |
-| PUT | `/api/v1/task` | Update a task |
-| DELETE | `/api/v1/task/{taskId}` | Soft delete a task |
-| GET | `/api/v1/task/employee/pending-tasks/{userName}` | Get pending tasks for employee |
-| GET | `/api/v1/task/employee/archive/{userName}` | Get completed tasks for employee |
-| PUT | `/api/v1/task/employee/update/` | Update task status |
+| GET | `/api/task` | List all tasks |
+| GET | `/api/task/{taskId}` | Get task by ID |
+| POST | `/api/task` | Create a new task |
+| PUT | `/api/task` | Update a task |
+| DELETE | `/api/task/{taskId}` | Soft delete a task |
+| GET | `/api/task/employee/pending-tasks/{userName}` | Get pending tasks for employee |
+| GET | `/api/task/employee/archive/{userName}` | Get completed tasks for employee |
+| PUT | `/api/task/employee/update/` | Update task status |
 
 ## Swagger UI
 

@@ -25,7 +25,25 @@ services:
       - "${ZIPKIN_PORT:-9411}:9411"
     networks: [ backend ]
 
-  # 3. DISCOVERY SERVICE (ARTIK İLK BU BAŞLIYOR)
+  # 3. RABBITMQ
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "${RABBITMQ_PORT:-5672}:5672"
+      - "${RABBITMQ_MGMT_PORT:-15672}:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-guest}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS:-guest}
+    healthcheck:
+      test: [ "CMD-SHELL", "rabbitmqctl status" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    networks: [ backend ]
+
+  # 4. DISCOVERY SERVICE (ARTIK İLK BU BAŞLIYOR)
   discovery-service:
     build:
       context: ..
@@ -98,6 +116,7 @@ services:
       - ZIPKIN_HOST=zipkin
       - ZIPKIN_PORT=9411
       - EUREKA_HOST=discovery-service
+      - RABBITMQ_HOST=rabbitmq
     depends_on:
       config-server:
         condition: service_healthy # Config Server şart (DB şifresi için)
@@ -105,6 +124,8 @@ services:
         condition: service_healthy
       discovery-service:
         condition: service_started
+      rabbitmq:
+        condition: service_healthy
     networks: [ backend ]
 
   project-service:
@@ -126,6 +147,7 @@ services:
       - ZIPKIN_HOST=zipkin
       - ZIPKIN_PORT=9411
       - EUREKA_HOST=discovery-service
+      - RABBITMQ_HOST=rabbitmq
     depends_on:
       config-server:
         condition: service_healthy
@@ -133,6 +155,8 @@ services:
         condition: service_healthy
       discovery-service:
         condition: service_started
+      rabbitmq:
+        condition: service_healthy
     networks: [ backend ]
 
   task-service:
@@ -154,6 +178,7 @@ services:
       - ZIPKIN_HOST=zipkin
       - ZIPKIN_PORT=9411
       - EUREKA_HOST=discovery-service
+      - RABBITMQ_HOST=rabbitmq
     depends_on:
       config-server:
         condition: service_healthy
@@ -161,6 +186,8 @@ services:
         condition: service_healthy
       discovery-service:
         condition: service_started
+      rabbitmq:
+        condition: service_healthy
     networks: [ backend ]
 
   # 6. GATEWAY SERVICE
@@ -182,6 +209,33 @@ services:
       - ZIPKIN_PORT=9411
     depends_on:
       config-server:
+        condition: service_healthy
+      discovery-service:
+        condition: service_started
+    networks: [ backend ]
+
+  # 7. NOTIFICATION SERVICE
+  notification-service:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+      args:
+        MODULE: notification-service
+    image: notification-service:dev
+    container_name: notification-service
+    ports:
+      - "${NOTIFICATION_PORT:-9094}:9094"
+    environment:
+      - SERVER_PORT=9094
+      - CONFIG_SERVER_HOST=config-server
+      - RABBITMQ_HOST=rabbitmq
+      - ZIPKIN_HOST=zipkin
+      - ZIPKIN_PORT=9411
+      - EUREKA_HOST=discovery-service
+    depends_on:
+      config-server:
+        condition: service_healthy
+      rabbitmq:
         condition: service_healthy
       discovery-service:
         condition: service_started

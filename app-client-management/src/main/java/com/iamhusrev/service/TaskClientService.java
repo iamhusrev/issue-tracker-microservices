@@ -5,7 +5,7 @@ import com.iamhusrev.entity.ResponseWrapper;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 
-@FeignClient(name = "task-service", path = "/api/v1/task", fallback = TaskClientFallback.class)
+@FeignClient(name = "task-service", path = "/api/task", fallback = TaskClientFallback.class)
 public interface TaskClientService {
 
     @GetMapping

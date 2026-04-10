@@ -5,20 +5,20 @@ Microservice for project lifecycle management, including assignment to managers 
 ## Overview
 
 - **Port:** 9091
-- **Base Path:** `/api/v1/project`
+- **Base Path:** `/api/project`
 - **Database:** PostgreSQL
 
 ## API Endpoints
 
 | Method | Path | Description |
 |---|---|---|
-| GET | `/api/v1/project` | List all projects |
-| GET | `/api/v1/project/{code}` | Get project by project code |
-| POST | `/api/v1/project` | Create a new project |
-| PUT | `/api/v1/project` | Update an existing project |
-| DELETE | `/api/v1/project/{code}` | Soft delete a project |
-| GET | `/api/v1/project/details/{userName}` | Get all projects for a manager |
-| PUT | `/api/v1/project/manager/complete/{code}` | Mark project as complete |
+| GET | `/api/project` | List all projects |
+| GET | `/api/project/{code}` | Get project by project code |
+| POST | `/api/project` | Create a new project |
+| PUT | `/api/project` | Update an existing project |
+| DELETE | `/api/project/{code}` | Soft delete a project |
+| GET | `/api/project/details/{userName}` | Get all projects for a manager |
+| PUT | `/api/project/manager/complete/{code}` | Mark project as complete |
 
 ## Swagger UI
 

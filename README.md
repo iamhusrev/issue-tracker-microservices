@@ -120,36 +120,36 @@ All endpoints are accessible through the Gateway at `http://localhost:8762`.
 
 | Method | Gateway Path | Description |
 |---|---|---|
-| GET | `/iamhusrev/dev/user/api/v1/user` | List all users |
-| GET | `/iamhusrev/dev/user/api/v1/user/{userName}` | Get user by username |
-| POST | `/iamhusrev/dev/user/api/v1/user` | Create user |
-| PUT | `/iamhusrev/dev/user/api/v1/user` | Update user |
-| DELETE | `/iamhusrev/dev/user/api/v1/user/{userName}` | Delete user |
+| GET | `/iamhusrev/dev/user/api/user` | List all users |
+| GET | `/iamhusrev/dev/user/api/user/{userName}` | Get user by username |
+| POST | `/iamhusrev/dev/user/api/user` | Create user |
+| PUT | `/iamhusrev/dev/user/api/user` | Update user |
+| DELETE | `/iamhusrev/dev/user/api/user/{userName}` | Delete user |
 
 ### Project Service
 
 | Method | Gateway Path | Description |
 |---|---|---|
-| GET | `/iamhusrev/dev/project/api/v1/project` | List all projects |
-| GET | `/iamhusrev/dev/project/api/v1/project/{code}` | Get project by code |
-| POST | `/iamhusrev/dev/project/api/v1/project` | Create project |
-| PUT | `/iamhusrev/dev/project/api/v1/project` | Update project |
-| DELETE | `/iamhusrev/dev/project/api/v1/project/{code}` | Delete project |
-| GET | `/iamhusrev/dev/project/api/v1/project/details/{userName}` | Project details by manager |
-| PUT | `/iamhusrev/dev/project/api/v1/project/manager/complete/{code}` | Complete project |
+| GET | `/iamhusrev/dev/project/api/project` | List all projects |
+| GET | `/iamhusrev/dev/project/api/project/{code}` | Get project by code |
+| POST | `/iamhusrev/dev/project/api/project` | Create project |
+| PUT | `/iamhusrev/dev/project/api/project` | Update project |
+| DELETE | `/iamhusrev/dev/project/api/project/{code}` | Delete project |
+| GET | `/iamhusrev/dev/project/api/project/details/{userName}` | Project details by manager |
+| PUT | `/iamhusrev/dev/project/api/project/manager/complete/{code}` | Complete project |
 
 ### Task Service
 
 | Method | Gateway Path | Description |
 |---|---|---|
-| GET | `/iamhusrev/dev/task/api/v1/task` | List all tasks |
-| GET | `/iamhusrev/dev/task/api/v1/task/{taskId}` | Get task by ID |
-| POST | `/iamhusrev/dev/task/api/v1/task` | Create task |
-| PUT | `/iamhusrev/dev/task/api/v1/task` | Update task |
-| DELETE | `/iamhusrev/dev/task/api/v1/task/{taskId}` | Delete task |
-| GET | `/iamhusrev/dev/task/api/v1/task/employee/pending-tasks/{userName}` | Employee pending tasks |
-| GET | `/iamhusrev/dev/task/api/v1/task/employee/archive/{userName}` | Employee archived tasks |
-| PUT | `/iamhusrev/dev/task/api/v1/task/employee/update/` | Update task status |
+| GET | `/iamhusrev/dev/task/api/task` | List all tasks |
+| GET | `/iamhusrev/dev/task/api/task/{taskId}` | Get task by ID |
+| POST | `/iamhusrev/dev/task/api/task` | Create task |
+| PUT | `/iamhusrev/dev/task/api/task` | Update task |
+| DELETE | `/iamhusrev/dev/task/api/task/{taskId}` | Delete task |
+| GET | `/iamhusrev/dev/task/api/task/employee/pending-tasks/{userName}` | Employee pending tasks |
+| GET | `/iamhusrev/dev/task/api/task/employee/archive/{userName}` | Employee archived tasks |
+| PUT | `/iamhusrev/dev/task/api/task/employee/update/` | Update task status |
 
 ## Monitoring & Observability
 

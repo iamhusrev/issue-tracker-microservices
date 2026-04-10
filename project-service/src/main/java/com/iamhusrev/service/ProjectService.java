@@ -6,6 +6,8 @@ import com.iamhusrev.dto.UserResponseDTO;
 import com.iamhusrev.entity.Project;
 import com.iamhusrev.entity.User;
 import com.iamhusrev.enums.Status;
+import com.iamhusrev.event.EventPublisher;
+import com.iamhusrev.event.ProjectEvent;
 import com.iamhusrev.exception.ProjectServiceException;
 import com.iamhusrev.repository.ProjectRepository;
 import com.iamhusrev.util.MapperUtil;
@@ -23,6 +25,7 @@ public class ProjectService {
     private final ProjectRepository projectRepository;
     private final MapperUtil mapperUtil;
     private final UserClientService userClientService;
+    private final EventPublisher eventPublisher;
 
 
     public ProjectDTO getByProjectCode(String code) {
@@ -46,6 +49,11 @@ public class ProjectService {
         }
         Project obj = mapperUtil.convert(dto, new Project());
         Project createdProject = projectRepository.save(obj);
+
+        eventPublisher.publish(new ProjectEvent("project.created", createdProject.getId(),
+                createdProject.getProjectCode(), createdProject.getProjectName(),
+                dto.getAssignedManager() != null ? dto.getAssignedManager().getUserName() : null));
+
         return mapperUtil.convert(createdProject, new ProjectDTO());
     }
 
@@ -63,6 +71,10 @@ public class ProjectService {
 
         Project updatedProject = projectRepository.save(convertedProject);
 
+        eventPublisher.publish(new ProjectEvent("project.updated", updatedProject.getId(),
+                updatedProject.getProjectCode(), updatedProject.getProjectName(),
+                dto.getAssignedManager() != null ? dto.getAssignedManager().getUserName() : null));
+
         return mapperUtil.convert(updatedProject, new ProjectDTO());
 
     }
@@ -77,6 +89,9 @@ public class ProjectService {
         project.setIsDeleted(true);
         project.setProjectCode(project.getProjectCode() + "-" + project.getId());
         projectRepository.save(project);
+
+        eventPublisher.publish(new ProjectEvent("project.deleted", project.getId(),
+                code, project.getProjectName(), null));
     }
 
     @Transactional
@@ -87,6 +102,10 @@ public class ProjectService {
         }
         project.setProjectStatus(Status.COMPLETE);
         Project completedProject = projectRepository.save(project);
+
+        eventPublisher.publish(new ProjectEvent("project.completed", completedProject.getId(),
+                completedProject.getProjectCode(), completedProject.getProjectName(), null));
+
         return mapperUtil.convert(completedProject, new ProjectDTO());
     }
 

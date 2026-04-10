@@ -5,18 +5,18 @@ Microservice responsible for user management including CRUD operations and role-
 ## Overview
 
 - **Port:** 9093
-- **Base Path:** `/api/v1/user`
+- **Base Path:** `/api/user`
 - **Database:** PostgreSQL
 
 ## API Endpoints
 
 | Method | Path | Description |
 |---|---|---|
-| GET | `/api/v1/user` | List all users (sorted by first name) |
-| GET | `/api/v1/user/{userName}` | Get user by username |
-| POST | `/api/v1/user` | Create a new user |
-| PUT | `/api/v1/user` | Update an existing user |
-| DELETE | `/api/v1/user/{userName}` | Soft delete a user |
+| GET | `/api/user` | List all users (sorted by first name) |
+| GET | `/api/user/{userName}` | Get user by username |
+| POST | `/api/user` | Create a new user |
+| PUT | `/api/user` | Update an existing user |
+| DELETE | `/api/user/{userName}` | Soft delete a user |
 
 ## Swagger UI
 

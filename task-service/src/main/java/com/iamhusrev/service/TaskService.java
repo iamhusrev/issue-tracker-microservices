@@ -7,6 +7,8 @@ import com.iamhusrev.entity.Project;
 import com.iamhusrev.entity.Task;
 import com.iamhusrev.entity.User;
 import com.iamhusrev.enums.Status;
+import com.iamhusrev.event.EventPublisher;
+import com.iamhusrev.event.TaskEvent;
 import com.iamhusrev.repository.TaskRepository;
 import com.iamhusrev.util.MapperUtil;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +27,7 @@ public class TaskService {
     private final TaskRepository taskRepository;
     private final MapperUtil mapperUtil;
     private final UserClientService userClientService;
+    private final EventPublisher eventPublisher;
 
 
     public TaskDTO findById(Long id) {
@@ -42,7 +45,12 @@ public class TaskService {
         dto.setTaskStatus(Status.OPEN);
         dto.setAssignedDate(LocalDate.now());
         Task task = mapperUtil.convert(dto, new Task());
-        taskRepository.save(task);
+        Task savedTask = taskRepository.save(task);
+
+        eventPublisher.publish(new TaskEvent("task.created", savedTask.getId(), dto.getTaskSubject(),
+                dto.getProject() != null ? dto.getProject().getProjectCode() : null,
+                dto.getAssignedEmployee() != null ? dto.getAssignedEmployee().getUserName() : null,
+                Status.OPEN));
     }
 
     @Transactional
@@ -56,6 +64,11 @@ public class TaskService {
             convertedTask.setTaskStatus(dto.getTaskStatus() == null ? task.get().getTaskStatus() : dto.getTaskStatus());
             convertedTask.setAssignedDate(task.get().getAssignedDate());
             taskRepository.save(convertedTask);
+
+            eventPublisher.publish(new TaskEvent("task.updated", convertedTask.getId(), dto.getTaskSubject(),
+                    dto.getProject() != null ? dto.getProject().getProjectCode() : null,
+                    dto.getAssignedEmployee() != null ? dto.getAssignedEmployee().getUserName() : null,
+                    convertedTask.getTaskStatus()));
         }
 
     }
@@ -68,6 +81,8 @@ public class TaskService {
         if (foundTask.isPresent()) {
             foundTask.get().setIsDeleted(true);
             taskRepository.save(foundTask.get());
+
+            eventPublisher.publish(new TaskEvent("task.deleted", id, null, null, null, null));
         }
 
 
@@ -116,6 +131,9 @@ public class TaskService {
         if (task.isPresent()) {
             task.get().setTaskStatus(dto.getTaskStatus());
             taskRepository.save(task.get());
+
+            eventPublisher.publish(new TaskEvent("task.status-changed", dto.getId(), null, null, null,
+                    dto.getTaskStatus()));
         }
 
     }

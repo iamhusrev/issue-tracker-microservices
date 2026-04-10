@@ -2,6 +2,8 @@ package com.iamhusrev.service;
 
 import com.iamhusrev.dto.UserDTO;
 import com.iamhusrev.entity.User;
+import com.iamhusrev.event.EventPublisher;
+import com.iamhusrev.event.UserEvent;
 import com.iamhusrev.exception.UserServiceException;
 import com.iamhusrev.repository.UserRepository;
 import com.iamhusrev.util.MapperUtil;
@@ -21,6 +23,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final MapperUtil mapperUtil;
+    private final EventPublisher eventPublisher;
 
 
     public List<UserDTO> listAllUsers() {
@@ -49,6 +52,9 @@ public class UserService {
 
         User save = userRepository.save(user);
 
+        eventPublisher.publish(new UserEvent("user.created", save.getId(), save.getUserName(),
+                save.getFirstName(), save.getLastName()));
+
         return mapperUtil.convert(save, new UserDTO());
 
     }
@@ -68,6 +74,9 @@ public class UserService {
         convertedUser.setId(user.getId());
         //save updated user
         userRepository.save(convertedUser);
+
+        eventPublisher.publish(new UserEvent("user.updated", convertedUser.getId(), convertedUser.getUserName(),
+                convertedUser.getFirstName(), convertedUser.getLastName()));
 
         return findByUserName(dto.getUserName());
     }
@@ -89,6 +98,8 @@ public class UserService {
     @Transactional
     public void deleteByUserName(String username) {
         userRepository.deleteByUserName(username);
+
+        eventPublisher.publish(new UserEvent("user.deleted", null, username, null, null));
     }
 
 
