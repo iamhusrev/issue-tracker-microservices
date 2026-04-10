@@ -9,6 +9,7 @@ import com.iamhusrev.repository.UserRepository;
 import com.iamhusrev.util.MapperUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,6 +25,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final MapperUtil mapperUtil;
     private final EventPublisher eventPublisher;
+    private final BCryptPasswordEncoder passwordEncoder;
 
 
     public List<UserDTO> listAllUsers() {
@@ -50,6 +52,10 @@ public class UserService {
 
         User user = mapperUtil.convert(dto, new User());
 
+        if (dto.getPassWord() != null) {
+            user.setPassWord(passwordEncoder.encode(dto.getPassWord()));
+        }
+
         User save = userRepository.save(user);
 
         eventPublisher.publish(new UserEvent("user.created", save.getId(), save.getUserName(),
@@ -68,6 +74,10 @@ public class UserService {
             throw new UserServiceException("User Does Not Exists");
         }
         User convertedUser = mapperUtil.convert(dto, new User());
+
+        if (dto.getPassWord() != null) {
+            convertedUser.setPassWord(passwordEncoder.encode(dto.getPassWord()));
+        }
 
         convertedUser.setEnabled(true);
 

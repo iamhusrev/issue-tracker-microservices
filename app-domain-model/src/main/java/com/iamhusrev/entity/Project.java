@@ -10,7 +10,9 @@ import java.time.LocalDate;
 
 
 @Entity
-@Table(name = "projects")
+@Table(name = "projects", uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"project_code", "organization_id"})
+})
 @NoArgsConstructor
 @Getter
 @Setter
@@ -18,7 +20,7 @@ import java.time.LocalDate;
 @JsonIgnoreProperties(value = {"hibernateLazyInitializer"},ignoreUnknown = true)
 public class Project extends BaseEntity {
 
-    @Column(unique = true)
+    @Column(name = "project_code")
     private String projectCode;
 
     private String projectName;

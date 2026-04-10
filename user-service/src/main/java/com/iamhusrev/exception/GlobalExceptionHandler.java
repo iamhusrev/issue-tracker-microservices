@@ -3,6 +3,8 @@ package com.iamhusrev.exception;
 import com.iamhusrev.entity.ResponseWrapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -25,6 +27,18 @@ public class GlobalExceptionHandler {
                 .collect(Collectors.joining(", "));
         ResponseWrapper response = new ResponseWrapper("Validation failed: " + errors, HttpStatus.BAD_REQUEST);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<ResponseWrapper> handleAuthenticationException(AuthenticationException ex) {
+        ResponseWrapper response = new ResponseWrapper("Authentication failed: " + ex.getMessage(), HttpStatus.UNAUTHORIZED);
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ResponseWrapper> handleAccessDeniedException(AccessDeniedException ex) {
+        ResponseWrapper response = new ResponseWrapper("Access denied: " + ex.getMessage(), HttpStatus.FORBIDDEN);
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
     }
 
     @ExceptionHandler(Exception.class)

@@ -2,6 +2,10 @@ package com.iamhusrev.entity;
 
 import lombok.*;
 import jakarta.persistence.*;
+import org.hibernate.annotations.Filter;
+import org.hibernate.annotations.FilterDef;
+import org.hibernate.annotations.ParamDef;
+
 import java.time.LocalDateTime;
 
 @NoArgsConstructor
@@ -9,6 +13,8 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @MappedSuperclass
+@FilterDef(name = "organizationFilter", parameters = @ParamDef(name = "orgId", type = Long.class))
+@Filter(name = "organizationFilter", condition = "organization_id = :orgId")
 public class BaseEntity {
 
     @Id
@@ -23,6 +29,9 @@ public class BaseEntity {
     public LocalDateTime lastUpdateDateTime;
     @Column(nullable = true)
     public Long lastUpdateUserId;
+
+    @Column(name = "organization_id")
+    private Long organizationId;
 
     private Boolean isDeleted=false;
 

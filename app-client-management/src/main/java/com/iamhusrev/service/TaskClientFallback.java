@@ -34,7 +34,7 @@ public class TaskClientFallback implements TaskClientService {
     }
 
     @Override
-    public ResponseWrapper employeePendingTasks() {
+    public ResponseWrapper employeePendingTasks(String userName) {
         return new ResponseWrapper("Cannot fetch pending tasks, service unavailable", null, HttpStatus.SERVICE_UNAVAILABLE);
     }
 
@@ -44,7 +44,7 @@ public class TaskClientFallback implements TaskClientService {
     }
 
     @Override
-    public ResponseWrapper employeeArchivedTasks() {
+    public ResponseWrapper employeeArchivedTasks(String userName) {
         return new ResponseWrapper("Cannot fetch archived tasks, service unavailable", null, HttpStatus.SERVICE_UNAVAILABLE);
     }
 }
