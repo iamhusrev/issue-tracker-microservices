@@ -10,5 +10,7 @@ scrape_configs:
           - 'user-service:9093'
           - 'project-service:9091'
           - 'task-service:9092'
+          - 'notification-service:9094'
           - 'gateway-service:8762'
           - 'discovery-service:8761'
+          - 'config-server:8888'

@@ -1,9 +1,11 @@
 package com.iamhusrev.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.iamhusrev.dto.ProjectDTO;
 import com.iamhusrev.dto.TaskDTO;
-import com.iamhusrev.dto.UserResponseDTO;
+import com.iamhusrev.dto.UserDTO;
 import com.iamhusrev.entity.Project;
+import com.iamhusrev.entity.ResponseWrapper;
 import com.iamhusrev.entity.Task;
 import com.iamhusrev.entity.User;
 import com.iamhusrev.enums.Status;
@@ -28,6 +30,7 @@ public class TaskService {
     private final MapperUtil mapperUtil;
     private final UserClientService userClientService;
     private final EventPublisher eventPublisher;
+    private final ObjectMapper objectMapper;
 
 
     public TaskDTO findById(Long id) {
@@ -111,13 +114,14 @@ public class TaskService {
 
     public List<TaskDTO> listAllTasksByStatusIsNot(Status status, String userName) {
 
-        UserResponseDTO userResponseDto = (UserResponseDTO) userClientService.getUserByUserName(userName).getData();
+        ResponseWrapper response = userClientService.getUserByUserName(userName);
+        UserDTO userDto = response == null ? null : objectMapper.convertValue(response.getData(), UserDTO.class);
 
-        if (userResponseDto == null || userResponseDto.getData() == null) {
+        if (userDto == null) {
             throw new IllegalArgumentException("User not found: " + userName);
         }
 
-        User loggedInUser = mapperUtil.convert(userResponseDto.getData(), new User());
+        User loggedInUser = mapperUtil.convert(userDto, new User());
 
         List<Task> list = taskRepository.findAllByTaskStatusIsNotAndAssignedEmployee(status, loggedInUser);
         return list.stream().map(obj -> mapperUtil.convert(obj, new TaskDTO())).collect(Collectors.toList());
@@ -139,13 +143,14 @@ public class TaskService {
     }
 
     public List<TaskDTO> listAllTasksByStatus(Status status, String userName) {
-        UserResponseDTO userResponseDto = (UserResponseDTO) userClientService.getUserByUserName(userName).getData();
+        ResponseWrapper response = userClientService.getUserByUserName(userName);
+        UserDTO userDto = response == null ? null : objectMapper.convertValue(response.getData(), UserDTO.class);
 
-        if (userResponseDto == null || userResponseDto.getData() == null) {
+        if (userDto == null) {
             throw new IllegalArgumentException("User not found: " + userName);
         }
 
-        User loggedInUser = mapperUtil.convert(userResponseDto.getData(), new User());
+        User loggedInUser = mapperUtil.convert(userDto, new User());
 
         List<Task> list = taskRepository.findAllByTaskStatusAndAssignedEmployee(status, loggedInUser);
         return list.stream().map(obj -> mapperUtil.convert(obj, new TaskDTO())).collect(Collectors.toList());

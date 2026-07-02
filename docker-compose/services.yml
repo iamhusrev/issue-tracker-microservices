@@ -10,6 +10,8 @@ services:
       POSTGRES_USER: ${DB_USERNAME:-postgres}
       POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
       POSTGRES_DB: ticketing-app
+    volumes:
+      - pgdata:/var/lib/postgresql/data
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U postgres" ]
       interval: 10s
@@ -43,7 +45,7 @@ services:
       start_period: 15s
     networks: [ backend ]
 
-  # 4. DISCOVERY SERVICE (ARTIK İLK BU BAŞLIYOR)
+  # 4. DISCOVERY SERVICE (Eureka)
   discovery-service:
     build:
       context: ..
@@ -59,16 +61,15 @@ services:
       - EUREKA_HOST=discovery-service
       - ZIPKIN_HOST=zipkin
       - ZIPKIN_PORT=9411
-      # DİKKAT: CONFIG_SERVER_HOST SİLİNDİ!
     healthcheck:
       test: [ "CMD-SHELL", "curl -f http://localhost:8761/actuator/health || exit 1" ]
       interval: 10s
       timeout: 5s
-      retries: 5
-      start_period: 10s
+      retries: 10
+      start_period: 15s
     networks: [ backend ]
 
-  # 4. CONFIG SERVER (Discovery'den Sonra Başlar)
+  # 5. CONFIG SERVER
   config-server:
     build:
       context: ..
@@ -87,7 +88,7 @@ services:
       - ./../config-repo:/app/config-repo
     depends_on:
       discovery-service:
-        condition: service_started
+        condition: service_healthy
     healthcheck:
       test: [ "CMD-SHELL", "curl -f http://localhost:8888/actuator/health || exit 1" ]
       interval: 10s
@@ -96,7 +97,7 @@ services:
       start_period: 20s
     networks: [ backend ]
 
-  # 5. MICROSERVICES (Config Server Healthy Olunca Başlar)
+  # 6. USER SERVICE
   user-service:
     build:
       context: ..
@@ -120,15 +121,22 @@ services:
       - JWT_SECRET=${JWT_SECRET:-issue-tracker-jwt-secret-key-must-be-at-least-256-bits-long-for-hs256}
     depends_on:
       config-server:
-        condition: service_healthy # Config Server şart (DB şifresi için)
+        condition: service_healthy
       database:
         condition: service_healthy
       discovery-service:
-        condition: service_started
+        condition: service_healthy
       rabbitmq:
         condition: service_healthy
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -f http://localhost:9093/actuator/health || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 45s
     networks: [ backend ]
 
+  # 7. PROJECT SERVICE
   project-service:
     build:
       context: ..
@@ -155,11 +163,18 @@ services:
       database:
         condition: service_healthy
       discovery-service:
-        condition: service_started
+        condition: service_healthy
       rabbitmq:
         condition: service_healthy
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -f http://localhost:9091/actuator/health || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 45s
     networks: [ backend ]
 
+  # 8. TASK SERVICE
   task-service:
     build:
       context: ..
@@ -186,12 +201,18 @@ services:
       database:
         condition: service_healthy
       discovery-service:
-        condition: service_started
+        condition: service_healthy
       rabbitmq:
         condition: service_healthy
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -f http://localhost:9092/actuator/health || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 45s
     networks: [ backend ]
 
-  # 6. GATEWAY SERVICE
+  # 9. GATEWAY SERVICE
   gateway-service:
     build:
       context: ..
@@ -213,10 +234,18 @@ services:
       config-server:
         condition: service_healthy
       discovery-service:
-        condition: service_started
+        condition: service_healthy
+      user-service:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -f http://localhost:8762/actuator/health || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 45s
     networks: [ backend ]
 
-  # 7. NOTIFICATION SERVICE
+  # 10. NOTIFICATION SERVICE
   notification-service:
     build:
       context: ..
@@ -240,8 +269,18 @@ services:
       rabbitmq:
         condition: service_healthy
       discovery-service:
-        condition: service_started
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -f http://localhost:9094/actuator/health || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 45s
     networks: [ backend ]
+
+  # UI (Next.js) is published as a separate repository:
+  #   https://github.com/iamhusrev/issue-tracker-ui
+  # Clone it alongside and run `npm run dev` — see the root README for details.
 
   # MONITORING
   prometheus:
@@ -255,6 +294,7 @@ services:
   grafana:
     image: grafana/grafana:latest
     container_name: grafana
+    # Host port 3030 avoids conflict with the Next.js UI on 3000.
     ports: ["${GRAFANA_PORT:-3030}:3000"]
     environment:
       - GF_SECURITY_ADMIN_USER=admin
@@ -268,3 +308,6 @@ services:
 networks:
   backend:
     driver: bridge
+
+volumes:
+  pgdata:

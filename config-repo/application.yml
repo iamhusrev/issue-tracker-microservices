@@ -38,15 +38,22 @@ resilience4j:
   timelimiter:
     configs:
       default:
-        timeoutDuration: 3s
+        # 3s was too aggressive — cold-start + Eureka lookup routinely exceeded it,
+        # forcing the circuit breaker open on the very first request.
+        timeoutDuration: 30s
 
 
 eureka:
   instance:
-    status-page-url-path: http://localhost:${server.port}/actuator
-    health-check-url-path: http://localhost:${server.port}/actuator/health
+    # Relative paths so Eureka resolves them against the registered host,
+    # not the container's own "localhost".
+    status-page-url-path: /actuator/info
+    health-check-url-path: /actuator/health
     instance-id: ${spring.application.name}:${server.port}
     prefer-ip-address: true
+    # Faster detection of dead/restarted instances (defaults: 30s / 90s).
+    lease-renewal-interval-in-seconds: 10
+    lease-expiration-duration-in-seconds: 30
   client:
     serviceUrl:
       defaultZone: http://${EUREKA_HOST:localhost}:${EUREKA_PORT:8761}/eureka/

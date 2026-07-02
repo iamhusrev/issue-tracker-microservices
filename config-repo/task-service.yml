@@ -15,5 +15,10 @@ spring:
 
   cloud:
     openfeign:
+      # Kept OFF on purpose: enabling it makes Spring Cloud run each Feign call on a
+      # separate thread (to enforce the resilience4j TimeLimiter), which drops the
+      # TenantContext ThreadLocal that FeignTenantInterceptor reads — so the X-User-*
+      # headers are never sent and user-service rejects the call with 403.
+      # Resilience is still provided by the controller-level @CircuitBreaker + fallbacks.
       circuitbreaker:
-        enabled: true
+        enabled: false

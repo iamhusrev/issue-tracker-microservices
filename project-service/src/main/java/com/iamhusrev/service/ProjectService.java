@@ -1,9 +1,10 @@
 package com.iamhusrev.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.iamhusrev.dto.ProjectDTO;
 import com.iamhusrev.dto.UserDTO;
-import com.iamhusrev.dto.UserResponseDTO;
 import com.iamhusrev.entity.Project;
+import com.iamhusrev.entity.ResponseWrapper;
 import com.iamhusrev.entity.User;
 import com.iamhusrev.enums.Status;
 import com.iamhusrev.event.EventPublisher;
@@ -26,6 +27,7 @@ public class ProjectService {
     private final MapperUtil mapperUtil;
     private final UserClientService userClientService;
     private final EventPublisher eventPublisher;
+    private final ObjectMapper objectMapper;
 
 
     public ProjectDTO getByProjectCode(String code) {
@@ -111,9 +113,8 @@ public class ProjectService {
 
     public List<ProjectDTO> listAllProjectDetails(String userName) throws ProjectServiceException {
 
-        UserResponseDTO userResponseDto = (UserResponseDTO) userClientService.getUserByUserName(userName).getData();
-
-        UserDTO user = userResponseDto.getData();
+        ResponseWrapper response = userClientService.getUserByUserName(userName);
+        UserDTO user = response == null ? null : objectMapper.convertValue(response.getData(), UserDTO.class);
 
         if (user != null) {
             List<Project> list = projectRepository.findAllByAssignedManagerId(user.getId());

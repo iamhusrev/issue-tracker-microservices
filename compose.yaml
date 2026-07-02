@@ -1,0 +1,10 @@
+# Root entrypoint so the whole stack comes up with a single `docker compose up`.
+# The actual service definitions live in docker-compose/services.yml and are
+# pulled in via `include` — relative paths inside that file (config-repo,
+# prometheus, grafana volumes) resolve against docker-compose/, so it stays put.
+#
+# Env: Compose auto-loads the `.env` file next to this compose.yaml (repo root).
+# See `.env` for host ports / credentials / JWT secret; every value also has a
+# sane default baked into services.yml, so a fresh clone boots with no setup.
+include:
+  - docker-compose/services.yml

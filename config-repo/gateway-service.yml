@@ -4,10 +4,26 @@ spring:
       ddl-auto: none
   cloud:
     gateway:
+      # Netty HTTP client defaults to 30s idle but waits forever on connect.
+      # Explicit bounds prevent the UI from hanging when a downstream is slow.
+      httpclient:
+        connect-timeout: 5000
+        response-timeout: 30s
       discovery:
         locator:
           enabled: true
           lower-case-service-id: true
+      default-filters:
+        - name: Retry
+          args:
+            retries: 3
+            statuses: BAD_GATEWAY,SERVICE_UNAVAILABLE,GATEWAY_TIMEOUT
+            methods: GET,POST,PUT,DELETE
+            backoff:
+              firstBackoff: 200ms
+              maxBackoff: 2s
+              factor: 2
+              basedOnPreviousValue: false
       globalcors:
         corsConfigurations:
           '[/**]':
@@ -29,21 +45,37 @@ spring:
             - Path=/iamhusrev/dev/auth/**
           filters:
             - RewritePath=/iamhusrev/dev/auth/(?<segment>.*),/api/auth/$\{segment}
+            - name: CircuitBreaker
+              args:
+                name: authBreaker
+                fallbackUri: forward:/fallback/auth
         - id: user-service
           uri: lb://user-service
           predicates:
             - Path=/iamhusrev/dev/user/**
           filters:
             - RewritePath=/iamhusrev/dev/user/(?<segment>.*),/$\{segment}
+            - name: CircuitBreaker
+              args:
+                name: userBreaker
+                fallbackUri: forward:/fallback/user
         - id: project-service
           uri: lb://project-service
           predicates:
             - Path=/iamhusrev/dev/project/**
           filters:
             - RewritePath=/iamhusrev/dev/project/(?<segment>.*),/$\{segment}
+            - name: CircuitBreaker
+              args:
+                name: projectBreaker
+                fallbackUri: forward:/fallback/project
         - id: task-service
           uri: lb://task-service
           predicates:
             - Path=/iamhusrev/dev/task/**
           filters:
             - RewritePath=/iamhusrev/dev/task/(?<segment>.*),/$\{segment}
+            - name: CircuitBreaker
+              args:
+                name: taskBreaker
+                fallbackUri: forward:/fallback/task

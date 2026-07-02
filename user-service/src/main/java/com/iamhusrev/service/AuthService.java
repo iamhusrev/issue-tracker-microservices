@@ -80,6 +80,7 @@ public class AuthService {
         return buildAuthResponse(savedUser);
     }
 
+    @Transactional
     public AuthResponseDTO login(LoginRequestDTO request) throws UserServiceException {
         User user = userRepository.findByUserName(request.getUserName());
         if (user == null) {
